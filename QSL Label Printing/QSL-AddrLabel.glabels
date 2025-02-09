@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Glabels-document xmlns="http://glabels.org/xmlns/3.0/">
+  <Template brand="DYMO" part="30253" size="Other" width="2.438in" height="3.625in" description="Address Label 2UP">
+    <Meta category="user-defined"/>
+    <Label-rectangle id="0" width="1in" height="3.5in" round="0in" x_waste="0in" y_waste="0in">
+      <Markup-margin size="0.063in"/>
+      <Layout nx="2" ny="1" x0="0.125in" y0="0.125in" dx="1in" dy="3.5in"/>
+    </Label-rectangle>
+  </Template>
+  <Objects id="0" rotate="True">
+    <Object-text x="0.255in" y="0.122266in" w="2.984in" h="0.756716in" justify="Left" valign="Center" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="10" font_weight="Regular" font_italic="False" line_spacing="1"><Field name="FNAME"/> <Field name="NAME"/><NL/><Field name="ADDR1"/><NL/><Field name="ADDR2"/> <Field name="STATE"/> <Field name="ZIP"/><NL/><Field name="COUNTRY"/></Span>
+    </Object-text>
+  </Objects>
+  <Merge type="Text/Comma/Line1Keys" src="/tmp/tmp.Y3ixfg4gxQ/logs.csv"/>
+  <Data/>
+</Glabels-document>

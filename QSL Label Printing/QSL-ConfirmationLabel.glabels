@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<Glabels-document xmlns="http://glabels.org/xmlns/3.0/">
+  <Template brand="Dymo" part="30256" size="Other" width="2.32283in" height="4.01575in" description="Address labels">
+    <Meta category="label"/>
+    <Meta category="media"/>
+    <Label-rectangle id="0" width="2.32283in" height="4.01575in" round="0in" x_waste="0in" y_waste="0in">
+      <Markup-margin size="0in"/>
+      <Layout nx="1" ny="1" x0="0in" y0="0in" dx="2.32283in" dy="4.01575in"/>
+    </Label-rectangle>
+  </Template>
+  <Objects id="0" rotate="True">
+    <Object-box x="1.14544in" y="1.47634in" w="0.75in" h="0.518835in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-box x="0.25489in" y="0.616538in" w="1.6308in" h="0.75in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-text x="0.0217668in" y="0.0532827in" w="1.98295in" h="0.257592in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="16" font_weight="Bold" font_italic="False" line_spacing="1">QSL de AF4H</Span>
+    </Object-text>
+    <Object-text x="-0.0818916in" y="0.33854in" w="3.964in" h="0.180541in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="12" font_weight="Regular" font_italic="False" line_spacing="1">Grid EM73 &#x2022; CQ Zone 05 &#x2022; ITU Zone 08 </Span>
+    </Object-text>
+    <Object-box x="2.12344in" y="0.622002in" w="1.6308in" h="0.75in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-box x="0.257453in" y="1.46652in" w="0.75in" h="0.528657in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-box x="2.14684in" y="1.47775in" w="0.75in" h="0.523278in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-box x="3.02047in" y="1.49618in" w="0.75in" h="0.504848in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-text x="0.232248in" y="0.65706in" w="1.71154in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">CONFIRMING QSO WITH</Span>
+    </Object-text>
+    <Object-text x="2.03241in" y="0.651521in" w="1.71154in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">YYYY MM DD</Span>
+    </Object-text>
+    <Object-text x="0.291424in" y="1.46925in" w="0.708987in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">UTC</Span>
+    </Object-text>
+    <Object-text x="1.17089in" y="1.47758in" w="0.708987in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">MHz</Span>
+    </Object-text>
+    <Object-text x="2.17642in" y="1.49344in" w="0.708987in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">2x MODE</Span>
+    </Object-text>
+    <Object-text x="3.05712in" y="1.51006in" w="0.708987in" h="0.21602in" justify="Center" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Sans" font_size="9" font_weight="Regular" font_italic="False" line_spacing="1">RST</Span>
+    </Object-text>
+    <Object-text x="2.31223in" y="0.0784564in" w="0in" h="0in" justify="Left" valign="Top" auto_shrink="False" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Serif" font_size="12" font_weight="Regular" font_italic="False" line_spacing="1">PSE QSL THX</Span>
+    </Object-text>
+    <Object-box x="2.28487in" y="0.0648628in" w="1.36481in" h="0.218713in" line_width="0.0138889in" line_color="0x000000ff" fill_color="0x00000000" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0"/>
+    <Object-text x="0.254167in" y="0.860138in" w="1.47384in" h="0.237267in" justify="Left" valign="Top" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="18" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="CALLSIGN"/>
+      </Span>
+    </Object-text>
+    <Object-text x="2.14825in" y="0.851335in" w="1.47384in" h="0.384544in" justify="Center" valign="Center" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="18" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="DATE"/>
+      </Span>
+    </Object-text>
+    <Object-text x="0.281104in" y="1.62307in" w="0.703923in" h="0.448244in" justify="Center" valign="Center" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="12" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="TIME"/>
+      </Span>
+    </Object-text>
+    <Object-text x="1.17042in" y="1.61647in" w="0.703923in" h="0.448244in" justify="Center" valign="Center" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="12" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="FREQ"/>
+      </Span>
+    </Object-text>
+    <Object-text x="2.16487in" y="1.63233in" w="0.703923in" h="0.448244in" justify="Center" valign="Center" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="12" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="MODE"/>
+      </Span>
+    </Object-text>
+    <Object-text x="3.04556in" y="1.63233in" w="0.703923in" h="0.448244in" justify="Center" valign="Center" auto_shrink="True" a0="1" a1="0" a2="0" a3="1" a4="0" a5="0">
+      <Span color="0x000000ff" font_family="Monospace" font_size="12" font_weight="Bold" font_italic="False" line_spacing="1">
+        <Field name="RST"/>
+      </Span>
+    </Object-text>
+  </Objects>
+  <Merge type="Text/Comma/Line1Keys" src="/tmp/tmp.OfgDff45OX/logs.csv"/>
+  <Data/>
+</Glabels-document>
