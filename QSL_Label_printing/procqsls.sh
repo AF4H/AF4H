@@ -14,7 +14,7 @@ echo "Fetching logged QSLs from ${FETCH_AFTER} to ${FETCH_BEFORE}"
 
 RAWLOGDIR="$(mktemp -d)"
 
-#DEBUG=1
+DEBUG=1
 
 cleanup(){
 	if [ "${pwd}" = "${RAWLOGDIR}" ]; then cd; fi
@@ -28,8 +28,8 @@ main(){
 	fetch_logs;
 	process_logs;
 	make_labels;
-	print_labels;
-	cleanup;
+	print_labels
+	#cleanup
 }
 
 initialize_data(){
@@ -67,12 +67,12 @@ fetch_logs(){
 		-d KEY=${QRZ_LOGBOOK_APIKEY} \
  		-d ACTION=FETCH \
 		-d OPTION=BETWEEN:${FETCH_AFTER}+${FETCH_BEFORE},TYPE:ADIF \
-		-o ${RAWLOGDIR}/_logbook.adif \
+		-o ${RAWLOGDIR}/logbook-raw.adif \
 		--no-progress-meter \
 		${QRZ_LOGBOOK_APIURL}
 
 #	Correct the way the logbook downlods and turn it into a basic .adif
-	cat ${RAWLOGDIR}/_logbook.adif | sed s/\&lt\;/\</g | sed s/\&gt\;/\>/g | grep ^\< | sed -r 's/:[0-9]{1,5}//g' | xargs >${RAWLOGDIR}/logbook.adif 2>/dev/null
+	cat ${RAWLOGDIR}/logbook-raw.adif | sed s/\&lt\;/\</g | sed s/\&gt\;/\>/g | grep ^\< | sed -r 's/:[0-9]{1,5}//g' | xargs >${RAWLOGDIR}/logbook.adif 2>/dev/null
 
 #Make sure we actually have logs...
 	if [[ $(wc -c ${RAWLOGDIR}/logbook.adif | cut -d\  -f1) -lt 10 ]]; then
@@ -147,12 +147,14 @@ fetch_qth() {
 		done
 }
 
-OUTLABEL="${QSL_OUTDIR}/$(date +%Y-%m-%d-%H-%M-%S)-"
+OUTLABEL="${QSL_OUTDIR}/$(date +%Y-%m-%d-%H-%M-%S)"
 
 make_labels() {
 	if [ "${DEBUG}" = "1" ]; then echo "make_labels"; fi
-	if [ ! -d "${QSL_OUTDIR}" ]; then mkdir -p ${QSL_OUTDIR}; fi
-	glabels-3-batch -o ${OUTLABEL}-Cards.pdf -i ${RAWLOGDIR}/logs.csv ~/QSL/QSL-ConfirmationLabel.glabels >/dev/null 2>&1
+	if [ ! -d "${OUTLABEL}" ]; then mkdir -p ${OUTLABEL}; fi
+	if [ "${DEBUG}" = "1" ]; then echo "RAWLOGDIR ${RAWLOGDIR}"; fi
+	if [ "${DEBUG}" = "1" ]; then echo "QSL_LABELDIR ${QSL_LABELDIR}"; fi
+	glabels-3-batch -o ${OUTLABEL}/Cards.pdf -i ${RAWLOGDIR}/logs.csv ${QSL_LABELDIR}/QSL-ConfirmationLabel.glabels >/dev/null 2>&1
 	#it's easiest for address labels for the CSV labels to be doubled
 	#vs having glabels make 2 copies
 	while read -r line; do 
@@ -161,13 +163,13 @@ make_labels() {
 		echo ${line} >> ${RAWLOGDIR}/logs-dup.csv
 	done < ${RAWLOGDIR}/logs.csv
 	tail -n+2 ${RAWLOGDIR}/logs-dup.csv | grep -Ev '^$' > ${RAWLOGDIR}/logs-addr.csv
-	glabels-3-batch -o ${OUTLABEL}-Addresses.pdf -i ${RAWLOGDIR}/logs-addr.csv ~/QSL/QSL-AddrLabel.glabels >/dev/null 2>&1
+	glabels-3-batch -o ${OUTLABEL}/Addresses.pdf -i ${RAWLOGDIR}/logs-addr.csv ${QSL_LABELDIR}/QSL-AddrLabel.glabels >/dev/null 2>&1
 }
 
 
 print_labels() {
-	lp -d DYMO41-Right ${OUTLABEL}-Cards.pdf
-	lp -d DYMO41-Left ${OUTLABEL}-Addresses.pdf
+	lp -d GSX-190II-QSL ${OUTLABEL}/Cards.pdf
+	lp -d GSX-190II-Address ${OUTLABEL}/Addresses.pdf
 }
 
 read_dom () {

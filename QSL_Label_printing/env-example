@@ -1,0 +1,12 @@
+# Rename to `.env` in the QSL Label Printing directory
+# and change to suit.
+
+QSL_OUTDIR="~/QSL/out"
+QRZ_APIURL='https://xmldata.qrz.com/xml/1.31/?'
+QRZ_APIUSER='FIXME'
+QRZ_APIPASS='FIXME'
+QRZ_AGENTID='AF4Hbash0.01'
+QRZ_LOGBOOK_APIURL='https://logbook.qrz.com/api'
+QRZ_LOGBOOK_KEY='NULL'
+QSL_OUTDIR="~/QSL/out/"
+QSL_LABEL_DIR="FIXME"
