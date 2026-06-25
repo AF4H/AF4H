@@ -14,7 +14,7 @@ Customized CUPS print driver for the Citizen GSX-190II, based on the Epson 9-Pin
  - "Avery 4011" (15/16 in tall by 3+1/2 in wide) - used for address labels
 
 
-#### qsl-confirmation.glabels:
+#### qsl-confirmation-Avery_4076.glabels:
 
 The template used to generate the "Avery 4076" QSL confirmation, which is then applied to the QSL card.
 
