@@ -1,11 +1,39 @@
-# Rename to `.env` in the QSL Label Printing directory
-# and change to suit.
+# AF4H QSL Label Printer
+# Environmental variables
+# https://www.github.com/AF4H
 
+# Setting DEBUG to 1 will be more verbose
+# when processing QSLs
+DEBUG=0
+
+# Where our PDF outputs go
 QSL_OUTDIR="~/QSL/out"
-QSL_LABEL_DIR="FIXME"
+
+# Where our .glabels files are stored
+QSL_LABELDIR="~/QSL"
+
+# QRZ credentials for looking up QSL mailing info
 QRZ_APIURL='https://xmldata.qrz.com/xml/1.31/?'
-QRZ_APIUSER='FIXME'
-QRZ_APIPASS='FIXME'
+QRZ_APIUSER='n0call'
+QRZ_APIPASS='password1234'
+
+# QRZ Logbook API info
+# to download log files
 QRZ_LOGBOOK_APIURL='https://logbook.qrz.com/api'
-QRZ_LOGBOOK_KEY='FIXME'
+QRZ_LOGBOOK_APIKEY='xxxx-xxxx-xxxx-xxxx'
+
+# What our script identifies itself as to QRZ
 QRZ_AGENTID='AF4Hbash0.01'
+
+# glabels files and printer to use
+# To view valid printers, run `lpstat -a`
+CARD_LABEL="${QSL_LABELDIR}/QSL-ConfirmationLabel-Avery_4076.glabels"
+CARD_PRINTER='CITIZEN_GSX-190II-4076'
+
+ADDR_LABEL="${QSL_LABELDIR}/QSL-AddrLabel-Avery_4013.glabels"
+ADDR_PRINTER='CITIZEN_GSX-190II-4013'
+
+
+# Caching below; manual edits will be overridden
+QRZ_APIKEY=''
+QRZ_APIKEY_DATE=''
