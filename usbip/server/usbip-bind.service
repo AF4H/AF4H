@@ -1,0 +1,11 @@
+[Unit]
+Description=Bind USB/IP Devices
+After=usbipd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/usbip-bind.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
