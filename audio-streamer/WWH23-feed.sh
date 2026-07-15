@@ -10,4 +10,4 @@ exec ffmpeg \
   -b:a 24k \
   -content_type audio/mpeg \
   -f mp3 \
-  icecast://source:streemz@localhost:8000/WWH23
+  icecast://source:XXXXXX@localhost:8000/WWH23
