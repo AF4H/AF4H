@@ -2,5 +2,10 @@
 
 modprobe usbip_host
 
-# Example. Get Bus ID from `usbip list -l` 
-usbip bind -b 1-1.2.1
+# USB Audio adapter (Wx)
+usbip bind -b 1-1.2.4.1
+
+# IC-7100
+usbip bind -b 1-1.2.4.4.1
+usbip bind -b 1-1.2.4.4.2
+usbip bind -b 1-1.2.4.4.3
