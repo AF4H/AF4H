@@ -1,0 +1,11 @@
+[Unit]
+Description=Serial to Network Proxy
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ser2net -n -c /etc/ser2net.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

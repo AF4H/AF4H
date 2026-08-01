@@ -1,0 +1,5 @@
+# Example ser2net configuration for AF4H radio and serial ports.
+#
+# Generated from `port-map.tsv` via `render-ser2net.sh`.
+# Edit the inventory, then regenerate this file so the docs and config stay in
+# lockstep.

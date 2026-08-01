@@ -1,0 +1,40 @@
+{
+  "host": {
+    "name": "radio-pi",
+    "uptime": null,
+    "ip": null
+  },
+  "services": [
+    {
+      "name": "usbipd",
+      "active": null,
+      "enabled": null
+    },
+    {
+      "name": "ser2net",
+      "active": null,
+      "enabled": null
+    },
+    {
+      "name": "avahi-daemon",
+      "active": null,
+      "enabled": null
+    },
+    {
+      "name": "radio-audio",
+      "active": null,
+      "enabled": null
+    }
+  ],
+  "usbip": {
+    "bound_devices": [],
+    "configured_devices": []
+  },
+  "serial": {
+    "ports": []
+  },
+  "audio": {
+    "mode": "unknown",
+    "health": "unknown"
+  }
+}

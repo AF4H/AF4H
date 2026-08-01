@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">%h Radio Server</name>
+  <service>
+    <type>_ssh._tcp</type>
+    <port>22</port>
+  </service>
+  <service>
+    <type>_http._tcp</type>
+    <port>80</port>
+  </service>
+  <service>
+    <type>_serial._tcp</type>
+    <port>7001</port>
+  </service>
+</service-group>

@@ -1,0 +1,12 @@
+[Unit]
+Description=Network Radio Dashboard
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/network-radio-server/dashboard
+ExecStart=/usr/bin/python3 /opt/network-radio-server/dashboard/server.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

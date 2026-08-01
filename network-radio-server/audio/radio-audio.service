@@ -1,0 +1,11 @@
+[Unit]
+Description=Radio Audio Bridge
+After=sound.target network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/network-radio-server/audio/radio-audio-bridge.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
