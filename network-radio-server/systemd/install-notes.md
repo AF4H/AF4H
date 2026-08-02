@@ -5,13 +5,15 @@ the repo.
 
 Suggested destinations:
 
-- `systemd/usbip-bind.service.d/override.conf` ->
-  `/etc/systemd/system/usbip-bind.service.d/override.conf`
-- `systemd/avahi-daemon.service.d/override.conf` ->
-  `/etc/systemd/system/avahi-daemon.service.d/override.conf`
 - `generated/systemd/*.service` -> `/etc/systemd/system/`
-- `udev/usbip-bind.rules` ->
+- `generated/dropins/systemd/usbip-bind.service.d/override.conf` ->
+  `/etc/systemd/system/usbip-bind.service.d/override.conf`
+- `generated/dropins/systemd/avahi-daemon.service.d/override.conf` ->
+  `/etc/systemd/system/avahi-daemon.service.d/override.conf`
+- `generated/rules/udev/usbip-bind.rules` ->
   `/etc/udev/rules.d/99-network-radio-server-usbip.rules`
+- `generated/rules/usbip/server/99-usbip-autobind.rules` ->
+  `/etc/udev/rules.d/99-usbip-autobind.rules`
 - `ser2net/ser2net.conf.example` -> reference output from the renderer
 - `config.yaml` -> canonical manifest for all NRS generated config
 - `ser2net/port-map.tsv` -> generated inventory for `ser2net`

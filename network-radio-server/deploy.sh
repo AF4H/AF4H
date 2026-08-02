@@ -45,13 +45,13 @@ install -d "$(dirname "$SER2NET_CONF")" "$(dirname "$USBIP_CONF")"
 "$CONFIG_RENDERER"
 source "$ROOT_DIR/generated.env"
 
-install_dir "$ROOT_DIR/systemd/usbip-bind.service.d/override.conf" \
+install_dir "$ROOT_DIR/generated/dropins/systemd/usbip-bind.service.d/override.conf" \
   "$SYSTEMD_DIR/usbip-bind.service.d/override.conf"
-install_dir "$ROOT_DIR/systemd/avahi-daemon.service.d/override.conf" \
+install_dir "$ROOT_DIR/generated/dropins/systemd/avahi-daemon.service.d/override.conf" \
   "$SYSTEMD_DIR/avahi-daemon.service.d/override.conf"
 install_dir "$ROOT_DIR/avahi/radio-pi.service" "$AVAHI_SERVICES_DIR/radio-pi.service"
-install_dir "$ROOT_DIR/udev/usbip-bind.rules" "$UDEV_RULES_DIR/99-network-radio-server-usbip.rules"
-install_dir "$ROOT_DIR/usbip/server/99-usbip-autobind.rules" "$UDEV_RULES_DIR/99-usbip-autobind.rules"
+install_dir "$ROOT_DIR/generated/rules/udev/usbip-bind.rules" "$UDEV_RULES_DIR/99-network-radio-server-usbip.rules"
+install_dir "$ROOT_DIR/generated/rules/usbip/server/99-usbip-autobind.rules" "$UDEV_RULES_DIR/99-usbip-autobind.rules"
 install_dir "$ROOT_DIR/generated/systemd/ser2net.service" "$SYSTEMD_DIR/ser2net.service"
 install_dir "$ROOT_DIR/generated/systemd/network-radio-dashboard.service" "$SYSTEMD_DIR/network-radio-dashboard.service"
 install_dir "$ROOT_DIR/generated/systemd/radio-audio.service" "$SYSTEMD_DIR/radio-audio.service"

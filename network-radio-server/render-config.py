@@ -98,6 +98,10 @@ def render_unit(name: str, unit: dict) -> str:
     return "\n".join(lines)
 
 
+def render_text_block(content: str) -> str:
+    return content.rstrip("\n") + "\n"
+
+
 def unit_filename(key: str) -> str:
     return f"{key.replace('_', '-')}.service"
 
@@ -123,6 +127,16 @@ def main() -> int:
     generated_systemd.mkdir(parents=True, exist_ok=True)
     for name, unit in manifest.get("systemd", {}).items():
         (generated_systemd / unit_filename(name)).write_text(render_unit(name, unit), encoding="utf-8")
+    generated_dropins = ROOT / "generated" / "dropins"
+    generated_dropins.mkdir(parents=True, exist_ok=True)
+    for entry in manifest.get("dropins", {}).values():
+        (generated_dropins / entry["path"]).parent.mkdir(parents=True, exist_ok=True)
+        (generated_dropins / entry["path"]).write_text(render_text_block(entry["content"]), encoding="utf-8")
+    generated_rules = ROOT / "generated" / "rules"
+    generated_rules.mkdir(parents=True, exist_ok=True)
+    for entry in manifest.get("rules", {}).values():
+        (generated_rules / entry["path"]).parent.mkdir(parents=True, exist_ok=True)
+        (generated_rules / entry["path"]).write_text(render_text_block(entry["content"]), encoding="utf-8")
     (ROOT / "generated.env").write_text(
         "\n".join(
             [

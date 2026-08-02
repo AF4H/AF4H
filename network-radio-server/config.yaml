@@ -4,6 +4,9 @@ defaults:
   install_root: /opt/network-radio-server
   ser2net_conf: /etc/ser2net.conf
   usbip_conf: /etc/usbip/devices.conf
+  systemd_dir: /etc/systemd/system
+  udev_rules_dir: /etc/udev/rules.d
+  avahi_services_dir: /etc/avahi/services
 
 ser2net:
   - port: 7301
@@ -143,3 +146,30 @@ services:
   usbip_bind: true
   usbip_attach: true
   usbip_watchdog: true
+
+dropins:
+  usbip_bind_override:
+    path: systemd/usbip-bind.service.d/override.conf
+    content: |
+      [Unit]
+      After=usbipd.service network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Environment=USBIP_CONFIG=/etc/usbip/devices.conf
+      ExecStart=
+      ExecStart=/usr/local/bin/usbip-bind.sh
+  avahi_daemon_override:
+    path: systemd/avahi-daemon.service.d/override.conf
+    content: |
+      [Unit]
+      After=network-online.target
+      Wants=network-online.target
+
+rules:
+  usbip_bind:
+    path: udev/usbip-bind.rules
+    content: ACTION=="add", SUBSYSTEM=="usb", TAG+="systemd", ENV{SYSTEMD_WANTS}+="usbip-bind.service"
+  usbip_autobind:
+    path: usbip/server/99-usbip-autobind.rules
+    content: ACTION=="add", SUBSYSTEM=="usb", RUN+="/usr/local/bin/usbip-autobind.sh"
