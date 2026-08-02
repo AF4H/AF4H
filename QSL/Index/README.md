@@ -9,7 +9,7 @@ This directory holds the scanner workflow for incoming QSL cards.
 - Generates a per-card HTML page that shows both sides
 - Generates gallery pages with 24 fronts per page
 - Builds a top-level index for moving through dates
-- Optionally publishes the output to a web server with `rsync`, `scp`, or any other command you prefer
+- Optionally publishes only the files generated in that run to a web server with `rsync`, `scp`, or any other command you prefer
 
 ## Files
 
@@ -52,4 +52,4 @@ python3 qslindex.py poke
 ## Notes
 
 - The generated HTML is intentionally plain and dependency-free so it will run cleanly on a fresh Debian install.
-- The publish step is intentionally flexible. A simple `rsync` command is the easiest way to mirror to a web server, but any shell command works if you need FTP or `scp`.
+- The publish step is intentionally flexible. A simple `rsync` command is the easiest way to upload only the current run's files, but any shell command works if you need FTP or `scp`.

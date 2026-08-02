@@ -21,6 +21,7 @@ import datetime as dt
 import html
 import math
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -42,7 +43,7 @@ output_root = ~/QSL/cards
 
 [publish]
 # Example rsync target:
-# command = rsync -a --delete "{output_root}/" "user@example.com:/srv/www/qsl/cards/"
+# command = cd "{output_root}" && rsync -a --relative {files} "user@example.com:/srv/www/qsl/cards/"
 command =
 """
 
@@ -64,7 +65,7 @@ class Card:
 
 
 def load_config(config_path: Path) -> configparser.ConfigParser:
-    parser = configparser.ConfigParser()
+    parser = configparser.ConfigParser(interpolation=None)
     parser.read_string(DEFAULT_CONFIG)
     if config_path.exists():
         parser.read(config_path)
@@ -100,6 +101,19 @@ def card_paths(root: Path, scan_date: dt.date, callsign: str) -> tuple[Path, Pat
 
 def card_html_path(card: Card) -> Path:
     return card.front.parent / f"{card.callsign}.html"
+
+
+def format_publish_files(root: Path, files: Iterable[Path]) -> str:
+    relative_files = []
+    for file_path in files:
+        try:
+            relative = file_path.relative_to(root)
+        except ValueError:
+            continue
+        relative_files.append(relative)
+
+    unique_files = sorted(dict.fromkeys(relative_files))
+    return " ".join(shlex.quote(str(path)) for path in unique_files)
 
 
 def scan_card(config: configparser.ConfigParser, callsign: str, scan_date: dt.date) -> Card:
@@ -400,7 +414,8 @@ def render_root_index(root: Path, cards: list[Card]) -> str:
     return html_page("QSL Index", body)
 
 
-def write_pages(root: Path, cards: list[Card]) -> None:
+def write_pages(root: Path, cards: list[Card]) -> list[Path]:
+    generated: list[Path] = []
     root.mkdir(parents=True, exist_ok=True)
 
     by_day: dict[dt.date, list[Card]] = {}
@@ -417,28 +432,38 @@ def write_pages(root: Path, cards: list[Card]) -> None:
             next_card = day_cards[index + 1] if index + 1 < len(day_cards) else None
             card_html = card_html_path(card)
             card_html.write_text(render_card_page(card, prev_card, next_card), encoding="utf-8")
+            generated.append(card_html)
 
         for page_number in range(page_count):
             page_name = "index.html" if page_number == 0 else f"index-{page_number + 1}.html"
-            (day_dir / page_name).write_text(render_gallery_page(day_dir, day_cards, page_number, page_count), encoding="utf-8")
+            page_path = day_dir / page_name
+            page_path.write_text(render_gallery_page(day_dir, day_cards, page_number, page_count), encoding="utf-8")
+            generated.append(page_path)
 
-    (root / "index.html").write_text(render_root_index(root, cards), encoding="utf-8")
+    root_index = root / "index.html"
+    root_index.write_text(render_root_index(root, cards), encoding="utf-8")
+    generated.append(root_index)
+    return generated
 
 
-def publish(config: configparser.ConfigParser, root: Path) -> None:
+def publish(config: configparser.ConfigParser, root: Path, files: Iterable[Path]) -> None:
     command = config.get("publish", "command", fallback="").strip()
     if not command:
         return
 
-    rendered = command.format(output_root=str(root), root=str(root))
+    rendered_files = format_publish_files(root, files)
+    if not rendered_files:
+        return
+
+    rendered = command.format(output_root=str(root), root=str(root), files=rendered_files)
     subprocess.run(rendered, shell=True, check=True)
 
 
-def build_site(config: configparser.ConfigParser) -> None:
+def build_site(config: configparser.ConfigParser) -> tuple[Path, list[Path]]:
     root = output_root(config)
     cards = discover_cards(root)
-    write_pages(root, cards)
-    publish(config, root)
+    generated = write_pages(root, cards)
+    return root, generated
 
 
 def parse_args(argv: Iterable[str]) -> argparse.Namespace:
@@ -463,12 +488,14 @@ def main(argv: Iterable[str]) -> int:
 
     if args.command == "scan":
         scan_date = parse_date(args.date)
-        scan_card(config, args.callsign, scan_date)
-        build_site(config)
+        card = scan_card(config, args.callsign, scan_date)
+        root, generated = build_site(config)
+        publish(config, root, [card.front, card.back, *generated])
         return 0
 
     if args.command in {"build", "poke"}:
-        build_site(config)
+        root, generated = build_site(config)
+        publish(config, root, generated)
         return 0
 
     raise AssertionError(f"unknown command: {args.command}")

@@ -11,4 +11,4 @@ output_root = ~/QSL/cards
 [publish]
 # Run after each build. rsync is the obvious choice, but scp or ftp wrappers
 # work too if you prefer.
-command = rsync -a --delete "{output_root}/" "user@example.com:/srv/www/qsl/cards/"
+command = cd "{output_root}" && rsync -a --relative {files} "user@example.com:/srv/www/qsl/cards/"
