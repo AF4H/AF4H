@@ -62,7 +62,8 @@ without rebuilding the whole system from scratch.
 
 The installed host mirrors the management entrypoints under
 `/opt/network-radio-server/` as well, so you can inspect or re-run the deploy
-and renderer scripts from the target machine after bootstrap.
+and renderer scripts from the target machine after bootstrap. The host also
+gets `/opt/network-radio-server/README-host.md` as a quick local reference.
 
 ## Ser2net Inputs Needed
 

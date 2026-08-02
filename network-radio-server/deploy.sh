@@ -45,6 +45,7 @@ install_file "$ROOT_DIR/deploy.sh" "$INSTALL_ROOT/deploy.sh"
 install_file "$ROOT_DIR/render-config.py" "$INSTALL_ROOT/render-config.py"
 install_file "$ROOT_DIR/bootstrap-install.sh" "$INSTALL_ROOT/bootstrap-install.sh"
 install_file "$ROOT_DIR/install-deps.sh" "$INSTALL_ROOT/install-deps.sh"
+install_file "$ROOT_DIR/README-host.md" "$INSTALL_ROOT/README-host.md"
 
 if [[ ! -x "$CONFIG_RENDERER" ]]; then
   echo "missing config renderer: $CONFIG_RENDERER" >&2
