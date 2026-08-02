@@ -45,6 +45,23 @@ sudo ./install-deps.sh
 sudo ./deploy.sh
 ```
 
+## Partial Checkout
+
+Yes. If you only want `network-radio-server`, you do not need to clone the
+entire repository. Use Git sparse checkout:
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/AF4H/AF4H.git
+cd AF4H
+git sparse-checkout set network-radio-server
+```
+
+That gives you just the tree you need while still keeping normal Git history
+available for that path. If you only want the current files and do not care
+about Git operations afterward, you can also download the GitHub subtree as a
+ZIP from the `network-radio-server` directory view, but sparse checkout is the
+better option for install and upgrade workflows.
+
 ## Upgrade Path
 
 1. Pull the latest repo changes.

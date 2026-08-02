@@ -24,12 +24,20 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 source /etc/os-release
 
+preflight() {
+  command -v apt-get >/dev/null 2>&1 || {
+    echo "bootstrap requires apt-get on Debian/Ubuntu hosts" >&2
+    exit 1
+  }
+  command -v sudo >/dev/null 2>&1 || true
+}
+
 install_bootstrap_tools() {
   case "${ID:-}" in
     debian|ubuntu)
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
-      apt-get install -y git ca-certificates curl
+      apt-get install -y git python3 ca-certificates curl
       ;;
     *)
       echo "unsupported distro for bootstrap: ${ID:-unknown}" >&2
@@ -38,6 +46,7 @@ install_bootstrap_tools() {
   esac
 }
 
+preflight
 install_bootstrap_tools
 git clone "$REPO_URL" "$TMPDIR/network-radio-server"
 cd "$TMPDIR/network-radio-server"
