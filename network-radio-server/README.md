@@ -26,6 +26,10 @@ additional radios and interfaces over time.
 4. Start the enabled services with `systemctl start usbipd usbip-bind ser2net \
 radio-audio radio-audio-streamer network-radio-dashboard`.
 
+If you prefer the browser workflow, the dashboard at `/` can edit the most
+common manifest fields, validate the result, then save, render, and apply from
+the same `config.yaml`.
+
 ## Recommended Layout
 
 - `generated/systemd/` - generated service units from the manifest
@@ -35,7 +39,8 @@ radio-audio radio-audio-streamer network-radio-dashboard`.
 - `usbip/` - generated device inventory and bind rules
 - `avahi/` - mDNS service definitions
 - `audio/` - audio bridge scripts and notes, plus `audio/streamer/`
-- `dashboard/` - future web status UI
+- `dashboard/` - web status/apply UI and JSON API, including validation and
+  a structured manifest editor
 
 ## Suggested Operating Model
 
@@ -46,8 +51,8 @@ radio-audio radio-audio-streamer network-radio-dashboard`.
 3. Serial radios are exposed on stable TCP ports through `ser2net`.
 4. Audio is routed to a local sink or stream endpoint used by WSJT-X workflows,
    weather-radio monitoring, and SAME alerting.
-5. A dashboard can later read service state from `systemctl`, `usbip`, and
-   health endpoints.
+5. A dashboard can read service state from `systemctl`, `usbip`, and health
+   endpoints, and can feed validated edits back into the same manifest.
 
 ## Repo Notes
 

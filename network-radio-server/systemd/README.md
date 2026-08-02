@@ -7,6 +7,11 @@ script installs them into `/etc/systemd/system/`. The manifest also renders the
 drop-ins and rules under `generated/dropins/` and `generated/rules/`, so the
 remaining checked-in files here are just the documentation for that layout.
 
+The dashboard backend reads the same manifest and exposes `/api/manifest`,
+`/api/status`, `/api/render`, and `/api/apply` so the future web UI can inspect
+and operate the same single source of truth instead of maintaining a parallel
+control path.
+
 Generated units:
 
 - `ser2net.service`

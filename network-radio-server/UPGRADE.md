@@ -13,5 +13,11 @@ usually enough because it regenerates and installs the outputs.
 If the manifest changes service enable flags, `deploy.sh` will also update the
 enabled units to match.
 
+If you are using the dashboard, the normal path is:
+
+1. Edit the structured manifest fields.
+2. Let the dashboard validate the manifest.
+3. Save, render, and apply from the same UI.
+
 If you change the helper scripts themselves, redeploy and restart the affected
 services afterward.

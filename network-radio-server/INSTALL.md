@@ -18,6 +18,10 @@ The expected path on Debian 13 is:
 4. Deploy:
    - `sudo ./deploy.sh`
 
+If you want the dashboard to manage edits instead of hand-editing the manifest,
+start the dashboard service after deployment and use its structured editor to
+save changes, validate them, and re-run render/apply.
+
 If the host is missing Python YAML support, install `python3-yaml` first.
 The dependency installer is distro-aware, so this is the place to add support
 for new Linux families later.

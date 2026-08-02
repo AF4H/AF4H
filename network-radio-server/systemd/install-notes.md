@@ -29,6 +29,16 @@ The deploy script renders `/etc/ser2net.conf` and `/etc/usbip/devices.conf`
 from `config.yaml` at install time, so the manifest is the thing to edit for
 port or device changes.
 
+The dashboard service is now an operator surface, not just a status stub. It
+can:
+
+- show the manifest summary and current service state
+- rerender generated artifacts from `config.yaml`
+- re-run the normal deploy path to apply changes and restart/re-enable units
+
+That means the same `config.yaml` drives both shell-based installs and the web
+UI path.
+
 Package list to expect:
 
 - `ser2net`
