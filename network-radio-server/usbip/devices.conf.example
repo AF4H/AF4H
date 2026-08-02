@@ -1,8 +1,5 @@
-SERVER=radio-pi.local
+SERVER=172.31.50.219
 
 DEVICES=(
-  "1-1.2.4.1"
-  "1-1.2.4.4.1"
-  "1-1.2.4.4.2"
-  "1-1.2.4.4.3"
+	"1-1.2.4.1" # USB Sound Adapter
 )

@@ -1,7 +1,7 @@
 # ser2net Port Map
 
-`port-map.tsv` is the source of truth. This file is the readable view of that
-inventory and should stay in lockstep with the TSV and generated config.
+`config.yaml` is the source of truth. This file is the readable view of that
+inventory and should stay in lockstep with the generated TSV and config.
 In the TSV, `-` in the flow column means no special flow control is required.
 
 ## Serial Console / Radio Ports
@@ -51,7 +51,7 @@ Settings:
 ## Notes
 
 - If any radio needs hardware flow control, add `rtscts` to the serial options.
-- If any interface needs a different baud rate, update the matching inventory
-  row in `port-map.tsv` and regenerate the config.
+- If any interface needs a different baud rate, update the matching manifest
+  entry in `config.yaml` and regenerate the config.
 - If a new device does not fit the usual bands, assign it a block once and keep
   it there so the port map stays readable.

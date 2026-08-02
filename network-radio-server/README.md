@@ -19,8 +19,7 @@ additional radios and interfaces over time.
 
 ## Quick Install
 
-1. Edit `ser2net/port-map.tsv` and `usbip/client/etc/usbip/devices.conf` for
-   the target host.
+1. Edit `config.yaml` for the target host.
 2. Run `./deploy.sh` from the repo root on the host.
 3. Review `/etc/ser2net.conf` and `/etc/usbip/devices.conf`.
 4. Start the enabled services with `systemctl start usbipd usbip-bind ser2net \
@@ -29,8 +28,9 @@ radio-audio radio-audio-streamer network-radio-dashboard`.
 ## Recommended Layout
 
 - `systemd/` - service units and drop-ins for host startup
-- `ser2net/` - `ser2net` configuration examples
-- `usbip/` - device inventory and bind rules
+- `config.yaml` - canonical manifest for ports, USB/IP, and audio flags
+- `ser2net/` - generated `ser2net` configuration examples
+- `usbip/` - generated device inventory and bind rules
 - `avahi/` - mDNS service definitions
 - `audio/` - audio bridge scripts and notes, plus `audio/streamer/`
 - `dashboard/` - future web status UI
@@ -49,9 +49,9 @@ radio-audio radio-audio-streamer network-radio-dashboard`.
 
 ## Repo Notes
 
-The bundle includes the service units, deploy script, and inventory templates
-needed to stage a working host without rebuilding the whole system from
-scratch.
+The bundle includes the service units, deploy script, and generated inventory
+artifacts needed to stage a working host without rebuilding the whole system
+from scratch.
 
 ## Ser2net Inputs Needed
 
@@ -72,7 +72,7 @@ mapping survives USB replugging.
 ## Current Ser2net Inventory
 
 The following devices are mapped in `ser2net/ports.md` and derived from
-`ser2net/port-map.tsv`:
+`config.yaml`:
 
 - 3 general console / radio serial ports at `115200 8N1`
 - 1 router console at `115200 8N1`
@@ -101,7 +101,7 @@ port number tells you the class of device before you even connect.
 - Use `/dev/serial/by-id/...` whenever possible so the mapping survives USB
   replugging.
 - The generated `/etc/ser2net.conf` is the install-time output of
-  `ser2net/port-map.tsv`, not a hand-edited file.
+  `config.yaml`, not a hand-edited file.
 
 ## Build Order
 

@@ -1,0 +1,57 @@
+version: 1
+
+defaults:
+  install_root: /opt/network-radio-server
+  ser2net_conf: /etc/ser2net.conf
+  usbip_conf: /etc/usbip/devices.conf
+
+ser2net:
+  - port: 7301
+    device: /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
+    baud: 115200
+    format: 8N1
+    flow: "-"
+    notes: local console or radio serial
+  - port: 7302
+    device: /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AR0KHLQA-if00-port0
+    baud: 115200
+    format: 8N1
+    flow: "-"
+    notes: local console or radio serial
+  - port: 7303
+    device: /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0
+    baud: 115200
+    format: 8N1
+    flow: "-"
+    notes: local console or radio serial
+  - port: 7304
+    device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_IC-7100_02015445_A-if00-port0
+    baud: 19200
+    format: 8N1
+    flow: "-"
+    notes: IC-7100 CAT
+  - port: 7305
+    device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_IC-7100_02015445_B-if00-port0
+    baud: 19200
+    format: 8N1
+    flow: "-"
+    notes: IC-7100 CAT
+  - port: 7310
+    device: /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0
+    baud: 115200
+    format: 8N1
+    flow: "-"
+    notes: router or infrastructure console
+
+usbip:
+  server: 172.31.50.219
+  devices:
+    - busid: 1-1.2.4.1
+      name: USB Sound Adapter
+      enabled: true
+
+audio:
+  streamer:
+    enabled: true
+    entrypoint: audio/streamer/WWH23-feed.sh
+    install_dir: /opt/network-radio-server/audio/streamer

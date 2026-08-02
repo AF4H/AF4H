@@ -9,7 +9,7 @@ AVAHI_SERVICES_DIR="${AVAHI_SERVICES_DIR:-/etc/avahi/services}"
 UDEV_RULES_DIR="${UDEV_RULES_DIR:-/etc/udev/rules.d}"
 SER2NET_CONF="${SER2NET_CONF:-/etc/ser2net.conf}"
 USBIP_CONF="${USBIP_CONF:-/etc/usbip/devices.conf}"
-SER2NET_RENDERER="${SER2NET_RENDERER:-$ROOT_DIR/ser2net/render-ser2net.sh}"
+CONFIG_RENDERER="${CONFIG_RENDERER:-$ROOT_DIR/render-config.py}"
 LOCAL_BIN_DIR="${LOCAL_BIN_DIR:-/usr/local/bin}"
 
 install_dir() {
@@ -35,6 +35,15 @@ install_tree "$ROOT_DIR/dashboard" "$INSTALL_ROOT/dashboard"
 install_tree "$ROOT_DIR/ser2net" "$INSTALL_ROOT/ser2net"
 install_tree "$ROOT_DIR/usbip" "$INSTALL_ROOT/usbip"
 
+if [[ ! -x "$CONFIG_RENDERER" ]]; then
+  echo "missing config renderer: $CONFIG_RENDERER" >&2
+  exit 1
+fi
+
+install -d "$(dirname "$SER2NET_CONF")" "$(dirname "$USBIP_CONF")"
+
+"$CONFIG_RENDERER"
+
 install_dir "$ROOT_DIR/systemd/usbip-bind.service.d/override.conf" \
   "$SYSTEMD_DIR/usbip-bind.service.d/override.conf"
 install_dir "$ROOT_DIR/systemd/ser2net.service" "$SYSTEMD_DIR/ser2net.service"
@@ -51,31 +60,6 @@ install_dir "$ROOT_DIR/avahi/radio-pi.service" "$AVAHI_SERVICES_DIR/radio-pi.ser
 install_dir "$ROOT_DIR/udev/usbip-bind.rules" "$UDEV_RULES_DIR/99-network-radio-server-usbip.rules"
 install_dir "$ROOT_DIR/usbip/server/99-usbip-autobind.rules" "$UDEV_RULES_DIR/99-usbip-autobind.rules"
 
-install -d "$(dirname "$SER2NET_CONF")" "$(dirname "$USBIP_CONF")"
-if [[ ! -x "$SER2NET_RENDERER" ]]; then
-  echo "missing ser2net renderer: $SER2NET_RENDERER" >&2
-  exit 1
-fi
-if ! awk -F'\t' '
-  NR == 1 { next }
-  NF < 4 {
-    printf "invalid ser2net row at line %d\n", NR > "/dev/stderr"
-    exit 1
-  }
-  {
-    if ($1 == "" || $2 == "" || $3 == "" || $4 == "") {
-      printf "missing required ser2net field at line %d\n", NR > "/dev/stderr"
-      exit 1
-    }
-    if (seen[$1]++) {
-      printf "duplicate ser2net port: %s\n", $1 > "/dev/stderr"
-      exit 1
-    }
-  }
-' "$ROOT_DIR/ser2net/port-map.tsv"; then
-  exit 1
-fi
-"$SER2NET_RENDERER" "$ROOT_DIR/ser2net/port-map.tsv" > "$SER2NET_CONF"
 install -d "$LOCAL_BIN_DIR"
 install -m 0755 "$ROOT_DIR/audio/radio-audio-bridge.sh" "$INSTALL_ROOT/audio/radio-audio-bridge.sh"
 install -m 0755 "$ROOT_DIR/audio/streamer/WWH23-feed.sh" "$INSTALL_ROOT/audio/streamer/WWH23-feed.sh"
@@ -84,7 +68,7 @@ install -m 0755 "$ROOT_DIR/audio/streamer/same-watch.sh" "$INSTALL_ROOT/audio/st
 install -m 0755 "$ROOT_DIR/usbip/usbip-bind.sh" "$LOCAL_BIN_DIR/usbip-bind.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-attach.sh" "$LOCAL_BIN_DIR/usbip-attach.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-watchdog.sh" "$LOCAL_BIN_DIR/usbip-watchdog.sh"
-install -m 0644 "$ROOT_DIR/usbip/client/etc/usbip/devices.conf" "$USBIP_CONF"
+install -m 0644 "$ROOT_DIR/usbip/devices.conf.example" "$USBIP_CONF"
 install -m 0755 "$ROOT_DIR/ser2net/render-ser2net.sh" "$INSTALL_ROOT/ser2net/render-ser2net.sh"
 systemctl daemon-reload
 udevadm control --reload-rules || true

@@ -12,8 +12,9 @@ Suggested destinations:
 - `udev/usbip-bind.rules` ->
   `/etc/udev/rules.d/99-network-radio-server-usbip.rules`
 - `ser2net/ser2net.conf.example` -> reference output from the renderer
-- `ser2net/port-map.tsv` -> source inventory for `ser2net`
-- `ser2net/render-ser2net.sh` -> helper that generates `/etc/ser2net.conf`
+- `config.yaml` -> canonical manifest for all NRS generated config
+- `ser2net/port-map.tsv` -> generated inventory for `ser2net`
+- `ser2net/render-ser2net.sh` -> legacy helper kept for compatibility
 - `usbip/server/*.service` -> `/etc/systemd/system/`
 - `usbip/client/*.service` -> `/etc/systemd/system/`
 - `usbip/client/etc/usbip/devices.conf` -> `/etc/usbip/devices.conf`
@@ -25,8 +26,9 @@ Suggested destinations:
 - `usbip/client/*` -> `/usr/local/bin/`
 
 Use `deploy.sh` from the repo root to stage the bundle and enable the services.
-The deploy script renders `/etc/ser2net.conf` from `ser2net/port-map.tsv` at
-install time, so the TSV is the thing to edit for port changes.
+The deploy script renders `/etc/ser2net.conf` and `/etc/usbip/devices.conf`
+from `config.yaml` at install time, so the manifest is the thing to edit for
+port or device changes.
 
 Package list to expect:
 
