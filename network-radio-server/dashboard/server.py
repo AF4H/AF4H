@@ -261,6 +261,7 @@ def dashboard_page() -> bytes:
     summary {{ cursor: pointer; font-weight: 700; }}
     .item {{ padding: 10px 0; border-top: 1px solid rgba(125,211,252,.1); }}
     .item:first-child {{ border-top: 0; padding-top: 0; }}
+    .kv {{ display: grid; gap: 6px; grid-template-columns: 160px 1fr; align-items: center; }}
   </style>
 </head>
 <body>
@@ -306,6 +307,18 @@ def dashboard_page() -> bytes:
           <details open>
             <summary>Audio streamers</summary>
             <div id="streamers"></div>
+          </details>
+          <details open>
+            <summary>Serial ports</summary>
+            <div id="ser2net"></div>
+          </details>
+          <details open>
+            <summary>USB/IP devices</summary>
+            <div id="usbip-devices"></div>
+          </details>
+          <details open>
+            <summary>Service enables</summary>
+            <div id="services"></div>
           </details>
           <details>
             <summary>Raw manifest preview</summary>
@@ -360,6 +373,39 @@ def dashboard_page() -> bytes:
         </div>`;
     }}
 
+    function renderSer2netRow(row, idx) {{
+      return `
+        <div class="item">
+          <div class="two-col">
+            <div><label>Port</label><input data-ser2net-field="port" data-index="${{idx}}" value="${{row.port ?? ""}}"></div>
+            <div><label>Device</label><input data-ser2net-field="device" data-index="${{idx}}" value="${{row.device || ""}}"></div>
+            <div><label>Baud</label><input data-ser2net-field="baud" data-index="${{idx}}" value="${{row.baud ?? ""}}"></div>
+            <div><label>Format</label><input data-ser2net-field="format" data-index="${{idx}}" value="${{row.format || ""}}"></div>
+            <div><label>Flow</label><input data-ser2net-field="flow" data-index="${{idx}}" value="${{row.flow || ""}}"></div>
+            <div><label>Notes</label><input data-ser2net-field="notes" data-index="${{idx}}" value="${{row.notes || ""}}"></div>
+          </div>
+        </div>`;
+    }}
+
+    function renderUsbipRow(device, idx) {{
+      return `
+        <div class="item">
+          <div class="two-col">
+            <div><label>Bus ID</label><input data-usbip-field="busid" data-index="${{idx}}" value="${{device.busid || ""}}"></div>
+            <div><label>Name</label><input data-usbip-field="name" data-index="${{idx}}" value="${{device.name || ""}}"></div>
+            <div><label>Enabled</label><input data-usbip-field="enabled" data-index="${{idx}}" value="${{device.enabled !== false}}"></div>
+          </div>
+        </div>`;
+    }}
+
+    function renderServiceRow(name, enabled) {{
+      return `
+        <div class="item kv">
+          <label>${{name}}</label>
+          <input data-service-name="${{name}}" value="${{enabled ? "true" : "false"}}">
+        </div>`;
+    }}
+
     function populateForm(manifest) {{
       currentManifest = manifest;
       window.__manifest_json = JSON.stringify(manifest);
@@ -370,6 +416,9 @@ def dashboard_page() -> bytes:
       document.getElementById("avahi-description").value = manifest.avahi?.description || "";
       const streamers = manifest.audio?.streamers || [];
       document.getElementById("streamers").innerHTML = streamers.map(renderStreamerRow).join("") || '<div class="muted">No streamers defined.</div>';
+      document.getElementById("ser2net").innerHTML = (manifest.ser2net || []).map(renderSer2netRow).join("") || '<div class="muted">No serial ports defined.</div>';
+      document.getElementById("usbip-devices").innerHTML = (manifest.usbip?.devices || []).map(renderUsbipRow).join("") || '<div class="muted">No USB/IP devices defined.</div>';
+      document.getElementById("services").innerHTML = Object.entries(manifest.services || {{}}).map(function(entry) {{ const name = entry[0]; const enabled = entry[1]; return renderServiceRow(name, enabled); }}).join("") || '<div class="muted">No services defined.</div>';
     }}
 
     function collectManifest() {{
@@ -377,7 +426,11 @@ def dashboard_page() -> bytes:
       manifest.defaults = manifest.defaults || {{}};
       manifest.avahi = manifest.avahi || {{}};
       manifest.audio = manifest.audio || {{}};
+      manifest.usbip = manifest.usbip || {{}};
+      manifest.services = manifest.services || {{}};
       manifest.audio.streamers = manifest.audio.streamers || [];
+      manifest.ser2net = manifest.ser2net || [];
+      manifest.usbip.devices = manifest.usbip.devices || [];
       manifest.defaults.install_root = document.getElementById("default-install-root").value.trim() || manifest.defaults.install_root;
       manifest.avahi.service_name = document.getElementById("avahi-service-name").value.trim() || manifest.avahi.service_name;
       manifest.avahi.display_name = document.getElementById("avahi-display-name").value.trim() || manifest.avahi.display_name;
@@ -391,6 +444,25 @@ def dashboard_page() -> bytes:
         }} else {{
           manifest.audio.streamers[idx][field] = node.value;
         }}
+      }});
+      document.querySelectorAll("[data-ser2net-field]").forEach((node) => {{
+        const idx = Number(node.dataset.index);
+        const field = node.dataset.ser2netField;
+        if (!manifest.ser2net[idx]) return;
+        manifest.ser2net[idx][field] = field === "baud" || field === "port" ? Number(node.value) || node.value : node.value;
+      }});
+      document.querySelectorAll("[data-usbip-field]").forEach((node) => {{
+        const idx = Number(node.dataset.index);
+        const field = node.dataset.usbipField;
+        if (!manifest.usbip.devices[idx]) return;
+        if (field === "enabled") {{
+          manifest.usbip.devices[idx][field] = node.value !== "false";
+        }} else {{
+          manifest.usbip.devices[idx][field] = node.value;
+        }}
+      }});
+      document.querySelectorAll("[data-service-name]").forEach((node) => {{
+        manifest.services[node.dataset.serviceName] = node.value !== "false";
       }});
       return manifest;
     }}
