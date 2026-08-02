@@ -31,12 +31,12 @@ for new Linux families later.
 For a fresh machine, use `bootstrap-install.sh`:
 
 ```bash
-sudo ./bootstrap-install.sh <repo-url> [ref]
+sudo ./bootstrap-install.sh
 ```
 
-That script clones the repo, checks out the requested ref, installs
-minimal bootstrap tooling first, then installs dependencies, and runs
-deployment.
+That script clones the AF4H repo, sparsely checks out
+`network-radio-server`, installs minimal bootstrap tooling first, then
+installs dependencies, and runs deployment.
 
 If you already have the repo, you can skip bootstrap and run:
 
@@ -47,20 +47,9 @@ sudo ./deploy.sh
 
 ## Partial Checkout
 
-Yes. If you only want `network-radio-server`, you do not need to clone the
-entire repository. Use Git sparse checkout:
-
-```bash
-git clone --filter=blob:none --sparse https://github.com/AF4H/AF4H.git
-cd AF4H
-git sparse-checkout set network-radio-server
-```
-
-That gives you just the tree you need while still keeping normal Git history
-available for that path. If you only want the current files and do not care
-about Git operations afterward, you can also download the GitHub subtree as a
-ZIP from the `network-radio-server` directory view, but sparse checkout is the
-better option for install and upgrade workflows.
+`bootstrap-install.sh` already does a sparse checkout of just the
+`network-radio-server` tree, so you do not need to clone the full repository
+for installs or upgrades.
 
 ## Upgrade Path
 

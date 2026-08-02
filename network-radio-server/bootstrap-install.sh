@@ -2,23 +2,10 @@
 
 set -euo pipefail
 
-REPO_URL="${1:-}"
-REF="${2:-main}"
+REF="${REF:-main}"
 TMPDIR="$(mktemp -d)"
-
-usage() {
-  cat <<'EOF'
-Usage: bootstrap-install.sh <repo-url> [ref]
-
-Bootstraps a fresh host by installing minimal clone tooling first, then
-fetching the repo, installing the full dependency set, and deploying.
-EOF
-}
-
-if [[ -z "$REPO_URL" ]]; then
-  usage
-  exit 1
-fi
+REPO_URL="https://github.com/AF4H/AF4H.git"
+SPARSE_PATH="network-radio-server"
 
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -29,7 +16,6 @@ preflight() {
     echo "bootstrap requires apt-get on Debian/Ubuntu hosts" >&2
     exit 1
   }
-  command -v sudo >/dev/null 2>&1 || true
 }
 
 install_bootstrap_tools() {
@@ -48,9 +34,12 @@ install_bootstrap_tools() {
 
 preflight
 install_bootstrap_tools
-git clone "$REPO_URL" "$TMPDIR/network-radio-server"
-cd "$TMPDIR/network-radio-server"
+
+git clone --filter=blob:none --sparse "$REPO_URL" "$TMPDIR/AF4H"
+cd "$TMPDIR/AF4H"
+git sparse-checkout set "$SPARSE_PATH"
 git checkout "$REF"
+cd "$SPARSE_PATH"
 
 ./install-deps.sh --assume-yes
 ./deploy.sh
