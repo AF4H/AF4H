@@ -62,6 +62,7 @@ install_dir "$ROOT_DIR/udev/usbip-bind.rules" "$UDEV_RULES_DIR/99-network-radio-
 install_dir "$ROOT_DIR/usbip/server/99-usbip-autobind.rules" "$UDEV_RULES_DIR/99-usbip-autobind.rules"
 
 install -d "$LOCAL_BIN_DIR"
+install -m 0644 "$ROOT_DIR/generated.env" "$INSTALL_ROOT/generated.env"
 install -m 0755 "$ROOT_DIR/audio/radio-audio-bridge.sh" "$INSTALL_ROOT/audio/radio-audio-bridge.sh"
 install -m 0755 "$ROOT_DIR/audio/streamer/WWH23-feed.sh" "$INSTALL_ROOT/audio/streamer/WWH23-feed.sh"
 install -m 0755 "$ROOT_DIR/audio/streamer/same-act.sh" "$INSTALL_ROOT/audio/streamer/same-act.sh"

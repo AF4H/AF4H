@@ -2,11 +2,14 @@
 
 set -euo pipefail
 
-# Placeholder audio bridge for the radio server.
-# This is intentionally conservative: it keeps the service structure in place
-# without hardcoding a final audio topology yet.
+source /opt/network-radio-server/generated.env
 
-logger -t radio-audio "starting placeholder audio bridge"
+if [[ "${AUDIO_BRIDGE_ENABLED:-true}" != "true" ]]; then
+    logger -t "${AUDIO_BRIDGE_LOGGER_TAG:-radio-audio}" "audio bridge disabled by config"
+    exit 0
+fi
+
+logger -t "${AUDIO_BRIDGE_LOGGER_TAG:-radio-audio}" "starting ${AUDIO_BRIDGE_MODE:-placeholder} audio bridge"
 
 while true; do
     sleep 60

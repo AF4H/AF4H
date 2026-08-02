@@ -51,10 +51,21 @@ usbip:
       enabled: true
 
 audio:
+  bridge:
+    enabled: true
+    mode: placeholder
+    logger_tag: radio-audio
   streamer:
     enabled: true
     entrypoint: audio/streamer/WWH23-feed.sh
     install_dir: /opt/network-radio-server/audio/streamer
+    logger_tag: WWH23-feed
+  same:
+    enabled: true
+    watch_entrypoint: audio/streamer/same-watch.sh
+    action_entrypoint: audio/streamer/same-act.sh
+    watch_tag: same-watch
+    action_tag: same-act
 
 services:
   ser2net: true
