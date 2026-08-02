@@ -55,17 +55,84 @@ audio:
     enabled: true
     mode: placeholder
     logger_tag: radio-audio
+    exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
   streamer:
     enabled: true
     entrypoint: audio/streamer/WWH23-feed.sh
     install_dir: /opt/network-radio-server/audio/streamer
     logger_tag: WWH23-feed
+    exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
   same:
     enabled: true
     watch_entrypoint: audio/streamer/same-watch.sh
     action_entrypoint: audio/streamer/same-act.sh
     watch_tag: same-watch
     action_tag: same-act
+    watch_exec_start: /opt/network-radio-server/audio/streamer/same-watch.sh
+    action_exec_start: /opt/network-radio-server/audio/streamer/same-act.sh
+
+systemd:
+  ser2net:
+    description: Serial to Network Proxy
+    after:
+      - network.target
+    exec_start: /usr/sbin/ser2net -n -c /etc/ser2net.conf
+    restart: on-failure
+  network_radio_dashboard:
+    description: Network Radio Dashboard
+    after:
+      - network.target
+    working_directory: /opt/network-radio-server/dashboard
+    exec_start: /usr/bin/python3 /opt/network-radio-server/dashboard/server.py
+    restart: on-failure
+  radio_audio:
+    description: Radio Audio Bridge
+    after:
+      - sound.target
+      - network.target
+    exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
+    restart: on-failure
+  radio_audio_streamer:
+    description: Weather Radio and Audio Streamer
+    after:
+      - network.target
+      - sound.target
+    exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
+    restart: always
+    restart_sec: 5
+  usbipd:
+    description: USB/IP Daemon
+    after:
+      - network.target
+    exec_start: /usr/sbin/usbipd -D
+    type: forking
+    pid_file: /run/usbipd.pid
+    restart: on-failure
+  usbip_bind:
+    description: Bind USB/IP Devices
+    after:
+      - usbipd.service
+    exec_start: /usr/local/bin/usbip-bind.sh
+    type: oneshot
+    remain_after_exit: true
+  usbip_attach:
+    description: Attach USB/IP Devices
+    after:
+      - network-online.target
+    wants:
+      - network-online.target
+    exec_start: /usr/local/bin/usbip-attach.sh
+    type: oneshot
+    remain_after_exit: true
+  usbip_watchdog:
+    description: USB/IP Watchdog
+    after:
+      - network-online.target
+    wants:
+      - network-online.target
+    exec_start: /usr/local/bin/usbip-watchdog.sh
+    restart: always
+    restart_sec: 5
 
 services:
   ser2net: true

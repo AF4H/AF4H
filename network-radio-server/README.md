@@ -21,13 +21,15 @@ additional radios and interfaces over time.
 
 1. Edit `config.yaml` for the target host.
 2. Run `./deploy.sh` from the repo root on the host.
-3. Review `/etc/ser2net.conf` and `/etc/usbip/devices.conf`.
+3. Review `/etc/ser2net.conf`, `/etc/usbip/devices.conf`, and the enabled
+   systemd units.
 4. Start the enabled services with `systemctl start usbipd usbip-bind ser2net \
 radio-audio radio-audio-streamer network-radio-dashboard`.
 
 ## Recommended Layout
 
-- `systemd/` - service units and drop-ins for host startup
+- `generated/systemd/` - generated service units from the manifest
+- `systemd/` - service drop-ins and exceptions for host startup
 - `config.yaml` - canonical manifest for ports, USB/IP, and audio flags
 - `ser2net/` - generated `ser2net` configuration examples
 - `usbip/` - generated device inventory and bind rules
@@ -49,9 +51,9 @@ radio-audio radio-audio-streamer network-radio-dashboard`.
 
 ## Repo Notes
 
-The bundle includes the service units, deploy script, and generated inventory
-artifacts needed to stage a working host without rebuilding the whole system
-from scratch.
+The bundle includes the manifest, deploy script, generated inventory artifacts,
+and a small set of non-generated drop-ins needed to stage a working host
+without rebuilding the whole system from scratch.
 
 ## Ser2net Inputs Needed
 
@@ -102,6 +104,8 @@ port number tells you the class of device before you even connect.
   replugging.
 - The generated `/etc/ser2net.conf` is the install-time output of
   `config.yaml`, not a hand-edited file.
+- Generated systemd units live under `generated/systemd/` and should also be
+  treated as manifest output.
 
 ## Build Order
 

@@ -68,6 +68,40 @@ def render_usbip(conf: dict) -> str:
     return "\n".join(lines)
 
 
+def render_unit(name: str, unit: dict) -> str:
+    lines = ["[Unit]", f"Description={unit['description']}"]
+    after = unit.get("after", [])
+    if after:
+        lines.append("After=" + " ".join(after))
+    wants = unit.get("wants", [])
+    if wants:
+        lines.append("Wants=" + " ".join(wants))
+    lines.append("")
+    lines.append("[Service]")
+    lines.append(f"Type={unit.get('type', 'simple')}")
+    if "working_directory" in unit:
+        lines.append(f"WorkingDirectory={unit['working_directory']}")
+    lines.append(f"ExecStart={unit['exec_start']}")
+    if "pid_file" in unit:
+        lines.append(f"PIDFile={unit['pid_file']}")
+    if unit.get("remain_after_exit"):
+        lines.append("RemainAfterExit=yes")
+    restart = unit.get("restart")
+    if restart:
+        lines.append(f"Restart={restart}")
+    if "restart_sec" in unit:
+        lines.append(f"RestartSec={unit['restart_sec']}")
+    lines.append("")
+    lines.append("[Install]")
+    lines.append("WantedBy=multi-user.target")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def unit_filename(key: str) -> str:
+    return f"{key.replace('_', '-')}.service"
+
+
 def main() -> int:
     manifest = load_config(ROOT / "config.yaml")
     ser2net = render_ser2net(manifest.get("ser2net", []))
@@ -85,6 +119,10 @@ def main() -> int:
     )
     (ROOT / "ser2net" / "ser2net.conf.example").write_text(ser2net, encoding="utf-8")
     (ROOT / "usbip" / "devices.conf.example").write_text(usbip, encoding="utf-8")
+    generated_systemd = ROOT / "generated" / "systemd"
+    generated_systemd.mkdir(parents=True, exist_ok=True)
+    for name, unit in manifest.get("systemd", {}).items():
+        (generated_systemd / unit_filename(name)).write_text(render_unit(name, unit), encoding="utf-8")
     (ROOT / "generated.env").write_text(
         "\n".join(
             [
