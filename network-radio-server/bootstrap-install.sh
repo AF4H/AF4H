@@ -12,6 +12,10 @@ trap 'rm -rf "$TMPDIR"' EXIT
 source /etc/os-release
 
 preflight() {
+  if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+    echo "bootstrap must be run as root (use sudo)" >&2
+    exit 1
+  fi
   command -v apt-get >/dev/null 2>&1 || {
     echo "bootstrap requires apt-get on Debian/Ubuntu hosts" >&2
     exit 1

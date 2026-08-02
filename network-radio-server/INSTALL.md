@@ -37,6 +37,8 @@ sudo ./bootstrap-install.sh
 That script clones the AF4H repo, sparsely checks out
 `network-radio-server`, installs minimal bootstrap tooling first, then
 installs dependencies, and runs deployment.
+Run it as root, typically via `sudo`, because it installs packages before the
+repo exists locally.
 
 If you already have the repo, you can skip bootstrap and run:
 
