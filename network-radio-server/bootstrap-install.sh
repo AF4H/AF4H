@@ -37,13 +37,17 @@ install_bootstrap_tools() {
 }
 
 preflight
+echo "Bootstrapping AF4H/network-radio-server"
 install_bootstrap_tools
 
+echo "Cloning sparse network-radio-server tree"
 git clone --filter=blob:none --sparse "$REPO_URL" "$TMPDIR/AF4H"
 cd "$TMPDIR/AF4H"
 git sparse-checkout set "$SPARSE_PATH"
 git checkout "$REF"
 cd "$SPARSE_PATH"
 
+echo "Installing network-radio-server dependencies"
 ./install-deps.sh --assume-yes
+echo "Rendering and deploying network-radio-server"
 ./deploy.sh

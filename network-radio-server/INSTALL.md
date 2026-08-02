@@ -47,6 +47,18 @@ sudo ./install-deps.sh
 sudo ./deploy.sh
 ```
 
+## Build Initial Configuration
+
+After bootstrapping, the initial configuration flow is:
+
+1. Edit `config.yaml` for the target host.
+2. Run `sudo ./render-config.py` if you want to inspect the generated outputs.
+3. Run `sudo ./deploy.sh` to install the generated config and enable the
+   selected services.
+
+The dashboard can also edit the common manifest sections, validate them, and
+then save, render, and apply through the same flow.
+
 ## Partial Checkout
 
 `bootstrap-install.sh` already does a sparse checkout of just the
