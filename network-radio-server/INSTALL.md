@@ -35,7 +35,8 @@ sudo ./bootstrap-install.sh <repo-url> [ref]
 ```
 
 That script clones the repo, checks out the requested ref, installs
-dependencies, and runs deployment.
+minimal bootstrap tooling first, then installs dependencies, and runs
+deployment.
 
 If you already have the repo, you can skip bootstrap and run:
 
