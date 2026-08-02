@@ -26,6 +26,13 @@ install_tree() {
   cp -a "$src_dir/." "$dst_dir/"
 }
 
+install_file() {
+  local src="$1"
+  local dst="$2"
+  install -d "$(dirname "$dst")"
+  install -m 0755 "$src" "$dst"
+}
+
 echo "Installing network-radio-server bundle to ${INSTALL_ROOT}"
 
 install -d "$INSTALL_ROOT"
@@ -34,6 +41,10 @@ install_tree "$ROOT_DIR/audio/streamer" "$INSTALL_ROOT/audio/streamer"
 install_tree "$ROOT_DIR/dashboard" "$INSTALL_ROOT/dashboard"
 install_tree "$ROOT_DIR/ser2net" "$INSTALL_ROOT/ser2net"
 install_tree "$ROOT_DIR/usbip" "$INSTALL_ROOT/usbip"
+install_file "$ROOT_DIR/deploy.sh" "$INSTALL_ROOT/deploy.sh"
+install_file "$ROOT_DIR/render-config.py" "$INSTALL_ROOT/render-config.py"
+install_file "$ROOT_DIR/bootstrap-install.sh" "$INSTALL_ROOT/bootstrap-install.sh"
+install_file "$ROOT_DIR/install-deps.sh" "$INSTALL_ROOT/install-deps.sh"
 
 if [[ ! -x "$CONFIG_RENDERER" ]]; then
   echo "missing config renderer: $CONFIG_RENDERER" >&2
@@ -88,3 +99,4 @@ fi
 
 echo "Installed systemd units and config files."
 echo "Review /etc/ser2net.conf and /etc/usbip/devices.conf before starting services."
+echo "Management scripts are also installed in ${INSTALL_ROOT}."

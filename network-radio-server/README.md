@@ -60,6 +60,10 @@ The bundle includes the manifest, deploy script, generated inventory artifacts,
 and a small set of non-generated drop-ins needed to stage a working host
 without rebuilding the whole system from scratch.
 
+The installed host mirrors the management entrypoints under
+`/opt/network-radio-server/` as well, so you can inspect or re-run the deploy
+and renderer scripts from the target machine after bootstrap.
+
 ## Ser2net Inputs Needed
 
 To add or change serial devices, capture one block of details per radio or USB

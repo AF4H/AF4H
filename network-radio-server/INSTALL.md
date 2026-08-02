@@ -59,6 +59,9 @@ After bootstrapping, the initial configuration flow is:
 The dashboard can also edit the common manifest sections, validate them, and
 then save, render, and apply through the same flow.
 
+After deployment, the host will have the management scripts in
+`/opt/network-radio-server/` alongside the runtime payload.
+
 ## Browser Workflow
 
 If the dashboard is running, you can manage the initial config from a browser:
