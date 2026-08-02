@@ -30,6 +30,32 @@ Bootstrap a fresh host from the installed scripts:
 sudo /opt/network-radio-server/bootstrap-install.sh
 ```
 
+## Suggested Startup Order
+
+After a fresh deploy, bring the stack up in this order:
+
+1. `usbipd`
+2. `usbip-bind`
+3. `usbip-attach`
+4. `usbip-watchdog`
+5. `ser2net`
+6. `radio-audio`
+7. `radio-audio-streamer`
+8. `network-radio-dashboard`
+
+For a quick check:
+
+```bash
+systemctl status usbipd usbip-bind usbip-attach usbip-watchdog ser2net \
+  radio-audio radio-audio-streamer network-radio-dashboard --no-pager -l
+```
+
+If the dashboard does not respond, check:
+
+- `systemctl status network-radio-dashboard --no-pager -l`
+- `ss -ltnp | grep 8787`
+- `/opt/network-radio-server/generated.env`
+
 ## Dashboard
 
 If the dashboard service is enabled, open:
