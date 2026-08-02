@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">AF4H Network Radio Server</name>
+  <service>
+    <type>_http._tcp</type>
+    <port>0</port>
+    <txt-record>description=Network radio server and audio router</txt-record>
+    <txt-record>service=radio-server</txt-record>
+  </service>
+</service-group>

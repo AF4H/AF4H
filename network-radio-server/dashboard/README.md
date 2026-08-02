@@ -7,6 +7,8 @@ This is intentionally lightweight. The first dashboard should expose:
 - serial port inventory
 - audio bridge health
 - host identity and network reachability
+- manifest revision and rendered config timestamps
+- audio streamer inventory and transport type
 
 Good first implementations:
 
@@ -15,3 +17,5 @@ Good first implementations:
 - later, a richer UI if the basic status surface proves useful
 
 Keep the dashboard read-only at first. Control surfaces tend to get messy fast.
+If/when you add edit controls, have them write to `config.yaml`, then rerender
+and apply through the normal deploy path instead of editing installed files.

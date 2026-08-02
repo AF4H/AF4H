@@ -59,20 +59,43 @@ audio:
     mode: placeholder
     logger_tag: radio-audio
     exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
-  streamer:
-    enabled: true
-    entrypoint: audio/streamer/WWH23-feed.sh
-    install_dir: /opt/network-radio-server/audio/streamer
-    logger_tag: WWH23-feed
-    exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
-  same:
-    enabled: true
-    watch_entrypoint: audio/streamer/same-watch.sh
-    action_entrypoint: audio/streamer/same-act.sh
-    watch_tag: same-watch
-    action_tag: same-act
-    watch_exec_start: /opt/network-radio-server/audio/streamer/same-watch.sh
-    action_exec_start: /opt/network-radio-server/audio/streamer/same-act.sh
+  streamers:
+    - name: wwh23_feed
+      enabled: true
+      mode: weather
+      source: audio-adapter:usb-sound-adapter
+      target: icecast
+      logger_tag: WWH23-feed
+      exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
+    - name: same_watch
+      enabled: true
+      mode: same-watch
+      source: audio-adapter:usb-sound-adapter
+      target: same-decoder
+      logger_tag: same-watch
+      exec_start: /opt/network-radio-server/audio/streamer/same-watch.sh
+    - name: same_act
+      enabled: true
+      mode: same-action
+      source: audio-adapter:usb-sound-adapter
+      target: same-action
+      logger_tag: same-act
+      exec_start: /opt/network-radio-server/audio/streamer/same-act.sh
+  transports:
+    - name: wsjtx_main
+      enabled: true
+      type: alsa
+      source: audio-adapter:usb-sound-adapter
+      target: wsjtx
+      logger_tag: radio-audio
+      exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
+    - name: icecast_weather
+      enabled: true
+      type: icecast
+      source: rtl-sdr:weather-radio
+      target: icecast
+      logger_tag: WWH23-feed
+      exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
 
 systemd:
   ser2net:
@@ -136,6 +159,13 @@ systemd:
     exec_start: /usr/local/bin/usbip-watchdog.sh
     restart: always
     restart_sec: 5
+
+avahi:
+  enabled: true
+  service_name: radio-server
+  display_name: AF4H Network Radio Server
+  description: Network radio server and audio router
+  port: 0
 
 services:
   ser2net: true

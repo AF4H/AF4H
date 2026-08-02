@@ -49,7 +49,7 @@ install_dir "$ROOT_DIR/generated/dropins/systemd/usbip-bind.service.d/override.c
   "$SYSTEMD_DIR/usbip-bind.service.d/override.conf"
 install_dir "$ROOT_DIR/generated/dropins/systemd/avahi-daemon.service.d/override.conf" \
   "$SYSTEMD_DIR/avahi-daemon.service.d/override.conf"
-install_dir "$ROOT_DIR/avahi/radio-pi.service" "$AVAHI_SERVICES_DIR/radio-pi.service"
+install_dir "$ROOT_DIR/avahi/radio-server.service" "$AVAHI_SERVICES_DIR/radio-server.service"
 install_dir "$ROOT_DIR/generated/rules/udev/usbip-bind.rules" "$UDEV_RULES_DIR/99-network-radio-server-usbip.rules"
 install_dir "$ROOT_DIR/generated/rules/usbip/server/99-usbip-autobind.rules" "$UDEV_RULES_DIR/99-usbip-autobind.rules"
 install_dir "$ROOT_DIR/generated/systemd/ser2net.service" "$SYSTEMD_DIR/ser2net.service"

@@ -68,6 +68,25 @@ def render_usbip(conf: dict) -> str:
     return "\n".join(lines)
 
 
+def render_avahi_service(avahi: dict) -> str:
+    return "\n".join(
+        [
+            '<?xml version="1.0" standalone="no"?>',
+            '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">',
+            '<service-group>',
+            f'  <name replace-wildcards="yes">{avahi["display_name"]}</name>',
+            '  <service>',
+            '    <type>_http._tcp</type>',
+            f'    <port>{avahi.get("port", 0)}</port>',
+            f'    <txt-record>description={avahi["description"]}</txt-record>',
+            f'    <txt-record>service={avahi["service_name"]}</txt-record>',
+            '  </service>',
+            '</service-group>',
+            "",
+        ]
+    )
+
+
 def render_unit(name: str, unit: dict) -> str:
     lines = ["[Unit]", f"Description={unit['description']}"]
     after = unit.get("after", [])
@@ -123,6 +142,9 @@ def main() -> int:
     )
     (ROOT / "ser2net" / "ser2net.conf.example").write_text(ser2net, encoding="utf-8")
     (ROOT / "usbip" / "devices.conf.example").write_text(usbip, encoding="utf-8")
+    avahi = manifest.get("avahi", {})
+    if avahi.get("enabled", False):
+        (ROOT / "avahi" / "radio-server.service").write_text(render_avahi_service(avahi), encoding="utf-8")
     generated_systemd = ROOT / "generated" / "systemd"
     generated_systemd.mkdir(parents=True, exist_ok=True)
     for name, unit in manifest.get("systemd", {}).items():
@@ -152,11 +174,9 @@ def main() -> int:
                 f"AUDIO_BRIDGE_ENABLED={str(bool(manifest.get('audio', {}).get('bridge', {}).get('enabled', True))).lower()}",
                 f"AUDIO_BRIDGE_MODE={manifest.get('audio', {}).get('bridge', {}).get('mode', 'placeholder')}",
                 f"AUDIO_BRIDGE_LOGGER_TAG={manifest.get('audio', {}).get('bridge', {}).get('logger_tag', 'radio-audio')}",
-                f"AUDIO_STREAMER_ENABLED={str(bool(manifest.get('audio', {}).get('streamer', {}).get('enabled', True))).lower()}",
-                f"AUDIO_STREAMER_LOGGER_TAG={manifest.get('audio', {}).get('streamer', {}).get('logger_tag', 'WWH23-feed')}",
-                f"SAME_ENABLED={str(bool(manifest.get('audio', {}).get('same', {}).get('enabled', True))).lower()}",
-                f"SAME_WATCH_TAG={manifest.get('audio', {}).get('same', {}).get('watch_tag', 'same-watch')}",
-                f"SAME_ACTION_TAG={manifest.get('audio', {}).get('same', {}).get('action_tag', 'same-act')}",
+                f"STREAMER_COUNT={len(manifest.get('audio', {}).get('streamers', []))}",
+                "AUDIO_STREAMERS=" + ",".join(s.get("name", "") for s in manifest.get("audio", {}).get("streamers", [])),
+                "AUDIO_TRANSPORTS=" + ",".join(t.get("name", "") for t in manifest.get("audio", {}).get("transports", [])),
                 "",
             ]
         ),

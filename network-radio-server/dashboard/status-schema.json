@@ -1,8 +1,14 @@
 {
   "host": {
-    "name": "radio-pi",
+    "name": "radio-server",
     "uptime": null,
-    "ip": null
+    "ip": null,
+    "reachable": null
+  },
+  "config": {
+    "manifest_path": "config.yaml",
+    "revision": null,
+    "last_rendered": null
   },
   "services": [
     {
@@ -24,17 +30,30 @@
       "name": "radio-audio",
       "active": null,
       "enabled": null
+    },
+    {
+      "name": "radio-audio-streamer",
+      "active": null,
+      "enabled": null
+    },
+    {
+      "name": "network-radio-dashboard",
+      "active": null,
+      "enabled": null
     }
   ],
   "usbip": {
     "bound_devices": [],
-    "configured_devices": []
+    "configured_devices": [],
+    "server": null
   },
   "serial": {
-    "ports": []
+    "ports": [],
+    "inventory_source": "config.yaml"
   },
   "audio": {
     "mode": "unknown",
-    "health": "unknown"
+    "health": "unknown",
+    "streamers": []
   }
 }
