@@ -1,0 +1,14 @@
+[scanner]
+device = brother5:bus2;dev6
+resolution = 100
+source = Automatic Document Feeder(left aligned,Duplex)
+format = png
+
+[paths]
+# Root folder for stored scans and generated HTML.
+output_root = ~/QSL/cards
+
+[publish]
+# Run after each build. rsync is the obvious choice, but scp or ftp wrappers
+# work too if you prefer.
+command = rsync -a --delete "{output_root}/" "user@example.com:/srv/www/qsl/cards/"

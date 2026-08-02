@@ -1,11 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
-STORPATH="~/QSL/cards"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [ -z ${3} ]; then
-	echo "USAGE: ${0} (QSL|SWL|HFTIX) (CALLSIGN) (DATE:YYYY-MM-DD)"
-	exit 255
+if [ $# -lt 1 ]; then
+  echo "USAGE: ${0} CALLSIGN [DATE:YYYY-MM-DD]"
+  echo "   or: ${0} QSL CALLSIGN [DATE:YYYY-MM-DD]"
+  exit 255
 fi
 
-scanimage -d 'brother5:bus2;dev6' --format=png --resolution 100 --AutoDocumentSize=yes --source "Automatic Document Feeder(left aligned,Duplex)" --batch-count=2 --batch-print --batch="${STORPATH}/${1^^}/${2^^}:${3^^}-%d.png"
+if [ $# -ge 2 ] && [[ "${1^^}" == "QSL" || "${1^^}" == "SWL" || "${1^^}" == "HFTIX" ]]; then
+  shift
+fi
 
+exec python3 "${SCRIPT_DIR}/qslindex.py" scan "$@"

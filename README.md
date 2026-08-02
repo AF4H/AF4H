@@ -8,4 +8,8 @@ This repository is intended to share (and maybe collaborate?) on various softwar
 
  2) **QSL Label Printing**: scripts, templates, etc that I use to process outgoing paper QSL cards. These are primarily driven via the QRZ.com logbook and APIs and use gLabels to generate PDFs for printing. The files now live under `QSL/labeling`.
 
- 3) **QSL Indexing**: Scripts used to scan, index, and display printed QSL cards received. The files now live under `QSL/Index`.
+ 3) **QSL Indexing**: scripts used to scan, index, display, and publish printed QSL cards received. The files now live under `QSL/Index`.
+
+ 4) **FieldLink**: the briefcase-based connectivity project for quick, non-technical network and phone deployment. The notes and node descriptions live under `FieldLink`.
+
+ 5) **Provisioning**: bootstrap and configuration scripts used to bring up fresh Debian installs. These are the `provisioning/` scripts and related helpers.
