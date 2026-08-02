@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-source /opt/network-radio-server/generated.env
+INSTALL_ROOT="${INSTALL_ROOT:-/opt/network-radio-server}"
+source "${INSTALL_ROOT}/generated.env"
 
 if [[ "${AUDIO_BRIDGE_ENABLED:-true}" != "true" ]]; then
     logger -t "${AUDIO_BRIDGE_LOGGER_TAG:-radio-audio}" "audio bridge disabled by config"

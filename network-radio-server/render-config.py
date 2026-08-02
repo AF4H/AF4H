@@ -134,6 +134,7 @@ def main() -> int:
                 f"ENABLE_USBIP_BIND={str(bool(services.get('usbip_bind', True))).lower()}",
                 f"ENABLE_USBIP_ATTACH={str(bool(services.get('usbip_attach', True))).lower()}",
                 f"ENABLE_USBIP_WATCHDOG={str(bool(services.get('usbip_watchdog', True))).lower()}",
+                f"INSTALL_ROOT={manifest.get('defaults', {}).get('install_root', '/opt/network-radio-server')}",
                 f"AUDIO_BRIDGE_ENABLED={str(bool(manifest.get('audio', {}).get('bridge', {}).get('enabled', True))).lower()}",
                 f"AUDIO_BRIDGE_MODE={manifest.get('audio', {}).get('bridge', {}).get('mode', 'placeholder')}",
                 f"AUDIO_BRIDGE_LOGGER_TAG={manifest.get('audio', {}).get('bridge', {}).get('logger_tag', 'radio-audio')}",
