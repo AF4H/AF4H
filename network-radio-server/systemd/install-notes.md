@@ -14,7 +14,6 @@ Suggested destinations:
 - `ser2net/ser2net.conf.example` -> reference output from the renderer
 - `config.yaml` -> canonical manifest for all NRS generated config
 - `ser2net/port-map.tsv` -> generated inventory for `ser2net`
-- `ser2net/render-ser2net.sh` -> legacy helper kept for compatibility
 - `usbip/server/*.service` -> `/etc/systemd/system/`
 - `usbip/client/*.service` -> `/etc/systemd/system/`
 - `usbip/client/etc/usbip/devices.conf` -> `/etc/usbip/devices.conf`

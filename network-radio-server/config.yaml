@@ -55,3 +55,13 @@ audio:
     enabled: true
     entrypoint: audio/streamer/WWH23-feed.sh
     install_dir: /opt/network-radio-server/audio/streamer
+
+services:
+  ser2net: true
+  radio_audio: true
+  radio_audio_streamer: true
+  network_radio_dashboard: true
+  usbipd: true
+  usbip_bind: true
+  usbip_attach: true
+  usbip_watchdog: true

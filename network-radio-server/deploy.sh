@@ -43,6 +43,7 @@ fi
 install -d "$(dirname "$SER2NET_CONF")" "$(dirname "$USBIP_CONF")"
 
 "$CONFIG_RENDERER"
+source "$ROOT_DIR/generated.env"
 
 install_dir "$ROOT_DIR/systemd/usbip-bind.service.d/override.conf" \
   "$SYSTEMD_DIR/usbip-bind.service.d/override.conf"
@@ -69,10 +70,20 @@ install -m 0755 "$ROOT_DIR/usbip/usbip-bind.sh" "$LOCAL_BIN_DIR/usbip-bind.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-attach.sh" "$LOCAL_BIN_DIR/usbip-attach.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-watchdog.sh" "$LOCAL_BIN_DIR/usbip-watchdog.sh"
 install -m 0644 "$ROOT_DIR/usbip/devices.conf.example" "$USBIP_CONF"
-install -m 0755 "$ROOT_DIR/ser2net/render-ser2net.sh" "$INSTALL_ROOT/ser2net/render-ser2net.sh"
 systemctl daemon-reload
 udevadm control --reload-rules || true
-systemctl enable usbipd.service usbip-bind.service ser2net.service radio-audio.service network-radio-dashboard.service
+services_to_enable=()
+[[ "${ENABLE_USBIPD}" == "true" ]] && services_to_enable+=(usbipd.service)
+[[ "${ENABLE_USBIP_BIND}" == "true" ]] && services_to_enable+=(usbip-bind.service)
+[[ "${ENABLE_USBIP_ATTACH}" == "true" ]] && services_to_enable+=(usbip-attach.service)
+[[ "${ENABLE_USBIP_WATCHDOG}" == "true" ]] && services_to_enable+=(usbip-watchdog.service)
+[[ "${ENABLE_SER2NET}" == "true" ]] && services_to_enable+=(ser2net.service)
+[[ "${ENABLE_RADIO_AUDIO}" == "true" ]] && services_to_enable+=(radio-audio.service)
+[[ "${ENABLE_RADIO_AUDIO_STREAMER}" == "true" ]] && services_to_enable+=(radio-audio-streamer.service)
+[[ "${ENABLE_NETWORK_RADIO_DASHBOARD}" == "true" ]] && services_to_enable+=(network-radio-dashboard.service)
+if ((${#services_to_enable[@]})); then
+  systemctl enable "${services_to_enable[@]}"
+fi
 
 echo "Installed systemd units and config files."
 echo "Review /etc/ser2net.conf and /etc/usbip/devices.conf before starting services."

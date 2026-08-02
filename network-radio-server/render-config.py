@@ -72,6 +72,7 @@ def main() -> int:
     manifest = load_config(ROOT / "config.yaml")
     ser2net = render_ser2net(manifest.get("ser2net", []))
     usbip = render_usbip(manifest["usbip"])
+    services = manifest.get("services", {})
 
     (ROOT / "ser2net" / "port-map.tsv").write_text(
         "port\tdevice\tbaud\tformat\tflow\tnotes\n"
@@ -84,6 +85,22 @@ def main() -> int:
     )
     (ROOT / "ser2net" / "ser2net.conf.example").write_text(ser2net, encoding="utf-8")
     (ROOT / "usbip" / "devices.conf.example").write_text(usbip, encoding="utf-8")
+    (ROOT / "generated.env").write_text(
+        "\n".join(
+            [
+                f"ENABLE_SER2NET={str(bool(services.get('ser2net', True))).lower()}",
+                f"ENABLE_RADIO_AUDIO={str(bool(services.get('radio_audio', True))).lower()}",
+                f"ENABLE_RADIO_AUDIO_STREAMER={str(bool(services.get('radio_audio_streamer', True))).lower()}",
+                f"ENABLE_NETWORK_RADIO_DASHBOARD={str(bool(services.get('network_radio_dashboard', True))).lower()}",
+                f"ENABLE_USBIPD={str(bool(services.get('usbipd', True))).lower()}",
+                f"ENABLE_USBIP_BIND={str(bool(services.get('usbip_bind', True))).lower()}",
+                f"ENABLE_USBIP_ATTACH={str(bool(services.get('usbip_attach', True))).lower()}",
+                f"ENABLE_USBIP_WATCHDOG={str(bool(services.get('usbip_watchdog', True))).lower()}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
     return 0
 
 
