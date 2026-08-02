@@ -5,7 +5,6 @@ the repo.
 
 Suggested destinations:
 
-- `systemd/*.service` -> `/etc/systemd/system/`
 - `systemd/usbip-bind.service.d/override.conf` ->
   `/etc/systemd/system/usbip-bind.service.d/override.conf`
 - `systemd/avahi-daemon.service.d/override.conf` ->
@@ -15,11 +14,15 @@ Suggested destinations:
 - `ser2net/ser2net.conf.example` -> reference output from the renderer
 - `ser2net/port-map.tsv` -> source inventory for `ser2net`
 - `ser2net/render-ser2net.sh` -> helper that generates `/etc/ser2net.conf`
-- `usbip/devices.conf.example` -> `/etc/usbip/devices.conf`
+- `usbip/server/*.service` -> `/etc/systemd/system/`
+- `usbip/client/*.service` -> `/etc/systemd/system/`
+- `usbip/client/etc/usbip/devices.conf` -> `/etc/usbip/devices.conf`
 - `audio/*` -> `/opt/network-radio-server/audio`
+- `audio/streamer/*` -> `/opt/network-radio-server/audio/streamer`
 - `dashboard/*` -> `/opt/network-radio-server/dashboard`
 - `ser2net/*` -> `/opt/network-radio-server/ser2net`
 - `usbip/usbip-bind.sh` -> `/usr/local/bin/usbip-bind.sh`
+- `usbip/client/*` -> `/usr/local/bin/`
 
 Use `deploy.sh` from the repo root to stage the bundle and enable the services.
 The deploy script renders `/etc/ser2net.conf` from `ser2net/port-map.tsv` at

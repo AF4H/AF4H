@@ -1,0 +1,12 @@
+[Unit]
+Description=Weather Radio and Audio Streamer
+After=network.target sound.target
+
+[Service]
+Type=simple
+ExecStart=/opt/network-radio-server/audio/streamer/WWH23-feed.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

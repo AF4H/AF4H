@@ -1,7 +1,6 @@
 [Unit]
-Description=Attach USB/IP Device
+Description=Attach USB/IP Devices
 After=network-online.target
-Wants=network-online.target
 
 [Service]
 Type=oneshot

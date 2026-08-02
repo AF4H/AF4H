@@ -8,7 +8,7 @@ services over the network.
 - Export selected USB devices with `usbip` and a udev-triggered bind helper
 - Provide serial CAT and programming access with `ser2net`
 - Advertise the host and services with `avahi`
-- Stream or bridge radio audio for WSJT-X and related tools
+- Stream or bridge radio audio for WSJT-X, SAME alerting, and related tools
 - Expose service status through a later dashboard
 
 ## Host Assumption
@@ -19,12 +19,12 @@ additional radios and interfaces over time.
 
 ## Quick Install
 
-1. Edit `ser2net/port-map.tsv` and `usbip/devices.conf.example` for the target
-   host.
+1. Edit `ser2net/port-map.tsv` and `usbip/client/etc/usbip/devices.conf` for
+   the target host.
 2. Run `./deploy.sh` from the repo root on the host.
 3. Review `/etc/ser2net.conf` and `/etc/usbip/devices.conf`.
 4. Start the enabled services with `systemctl start usbipd usbip-bind ser2net \
-radio-audio network-radio-dashboard`.
+radio-audio radio-audio-streamer network-radio-dashboard`.
 
 ## Recommended Layout
 
@@ -32,7 +32,7 @@ radio-audio network-radio-dashboard`.
 - `ser2net/` - `ser2net` configuration examples
 - `usbip/` - device inventory and bind rules
 - `avahi/` - mDNS service definitions
-- `audio/` - audio bridge scripts and notes
+- `audio/` - audio bridge scripts and notes, plus `audio/streamer/`
 - `dashboard/` - future web status UI
 
 ## Suggested Operating Model
@@ -42,7 +42,8 @@ radio-audio network-radio-dashboard`.
 2. USB devices that should be shared are bound to `usbip` via the bind helper
    and a udev rule.
 3. Serial radios are exposed on stable TCP ports through `ser2net`.
-4. Audio is routed to a local sink or stream endpoint used by WSJT-X workflows.
+4. Audio is routed to a local sink or stream endpoint used by WSJT-X workflows,
+   weather-radio monitoring, and SAME alerting.
 5. A dashboard can later read service state from `systemctl`, `usbip`, and
    health endpoints.
 
