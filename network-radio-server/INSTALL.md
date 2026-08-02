@@ -59,6 +59,30 @@ After bootstrapping, the initial configuration flow is:
 The dashboard can also edit the common manifest sections, validate them, and
 then save, render, and apply through the same flow.
 
+## Browser Workflow
+
+If the dashboard is running, you can manage the initial config from a browser:
+
+1. Start the service if needed:
+   ```bash
+   sudo systemctl start network-radio-dashboard
+   ```
+2. Find the host IP:
+   ```bash
+   hostname -I
+   ```
+3. Open `http://HOST_IP:8787/`.
+4. Edit the structured manifest sections.
+5. Click `Save Manifest`, then `Render Config`, then `Apply / Restart`.
+
+If you prefer an SSH tunnel instead of exposing the port directly:
+
+```bash
+ssh -L 8787:localhost:8787 user@HOST
+```
+
+Then open `http://localhost:8787/`.
+
 ## Partial Checkout
 
 `bootstrap-install.sh` already does a sparse checkout of just the
