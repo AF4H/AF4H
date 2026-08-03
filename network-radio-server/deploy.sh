@@ -46,6 +46,7 @@ install_file "$ROOT_DIR/render-config.py" "$INSTALL_ROOT/render-config.py"
 install_file "$ROOT_DIR/bootstrap-install.sh" "$INSTALL_ROOT/bootstrap-install.sh"
 install_file "$ROOT_DIR/install-deps.sh" "$INSTALL_ROOT/install-deps.sh"
 install_file "$ROOT_DIR/README-host.md" "$INSTALL_ROOT/README-host.md"
+install_file "$ROOT_DIR/config.yaml" "$INSTALL_ROOT/config.yaml"
 
 if [[ ! -x "$CONFIG_RENDERER" ]]; then
   echo "missing config renderer: $CONFIG_RENDERER" >&2
@@ -72,6 +73,7 @@ install_dir "$ROOT_DIR/generated/systemd/usbipd.service" "$SYSTEMD_DIR/usbipd.se
 install_dir "$ROOT_DIR/generated/systemd/usbip-bind.service" "$SYSTEMD_DIR/usbip-bind.service"
 install_dir "$ROOT_DIR/generated/systemd/usbip-attach.service" "$SYSTEMD_DIR/usbip-attach.service"
 install_dir "$ROOT_DIR/generated/systemd/usbip-watchdog.service" "$SYSTEMD_DIR/usbip-watchdog.service"
+install_dir "$ROOT_DIR/generated/systemd/network-radio-server.target" "$SYSTEMD_DIR/network-radio-server.target"
 
 install -d "$LOCAL_BIN_DIR"
 install -m 0644 "$ROOT_DIR/generated.env" "$INSTALL_ROOT/generated.env"
@@ -94,6 +96,7 @@ services_to_enable=()
 [[ "${ENABLE_RADIO_AUDIO}" == "true" ]] && services_to_enable+=(radio-audio.service)
 [[ "${ENABLE_RADIO_AUDIO_STREAMER}" == "true" ]] && services_to_enable+=(radio-audio-streamer.service)
 [[ "${ENABLE_NETWORK_RADIO_DASHBOARD}" == "true" ]] && services_to_enable+=(network-radio-dashboard.service)
+[[ "${ENABLE_NETWORK_RADIO_SERVER_TARGET}" == "true" ]] && services_to_enable+=(network-radio-server.target)
 if ((${#services_to_enable[@]})); then
   systemctl enable "${services_to_enable[@]}"
 fi

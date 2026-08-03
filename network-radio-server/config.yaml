@@ -172,6 +172,7 @@ services:
   radio_audio: true
   radio_audio_streamer: true
   network_radio_dashboard: true
+  network_radio_server_target: true
   usbipd: true
   usbip_bind: true
   usbip_attach: true

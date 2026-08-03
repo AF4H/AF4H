@@ -5,6 +5,7 @@ This is the installed host-side bundle for `network-radio-server`.
 ## Live Files
 
 - `/opt/network-radio-server/generated.env`
+- `/opt/network-radio-server/config.yaml`
 - `/opt/network-radio-server/deploy.sh`
 - `/opt/network-radio-server/render-config.py`
 - `/opt/network-radio-server/bootstrap-install.sh`
@@ -28,6 +29,12 @@ Bootstrap a fresh host from the installed scripts:
 
 ```bash
 sudo /opt/network-radio-server/bootstrap-install.sh
+```
+
+Start the whole stack in one shot:
+
+```bash
+sudo systemctl start network-radio-server.target
 ```
 
 ## Suggested Startup Order

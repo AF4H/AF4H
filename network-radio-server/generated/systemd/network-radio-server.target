@@ -1,0 +1,7 @@
+[Unit]
+Description=Network Radio Server Stack
+Wants=usbipd.service usbip-bind.service usbip-attach.service usbip-watchdog.service ser2net.service radio-audio.service radio-audio-streamer.service network-radio-dashboard.service
+After=usbipd.service usbip-bind.service usbip-attach.service usbip-watchdog.service ser2net.service radio-audio.service radio-audio-streamer.service network-radio-dashboard.service
+
+[Install]
+WantedBy=multi-user.target

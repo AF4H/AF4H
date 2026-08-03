@@ -117,6 +117,19 @@ def render_unit(name: str, unit: dict) -> str:
     return "\n".join(lines)
 
 
+def render_target(description: str, wants: list[str], after: list[str]) -> str:
+    lines = ["[Unit]", f"Description={description}"]
+    if after:
+        lines.append("After=" + " ".join(after))
+    if wants:
+        lines.append("Wants=" + " ".join(wants))
+    lines.append("")
+    lines.append("[Install]")
+    lines.append("WantedBy=multi-user.target")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_text_block(content: str) -> str:
     return content.rstrip("\n") + "\n"
 
@@ -149,6 +162,21 @@ def main() -> int:
     generated_systemd.mkdir(parents=True, exist_ok=True)
     for name, unit in manifest.get("systemd", {}).items():
         (generated_systemd / unit_filename(name)).write_text(render_unit(name, unit), encoding="utf-8")
+    if services.get("network_radio_server_target", True):
+        target_units = [
+            "usbipd.service",
+            "usbip-bind.service",
+            "usbip-attach.service",
+            "usbip-watchdog.service",
+            "ser2net.service",
+            "radio-audio.service",
+            "radio-audio-streamer.service",
+            "network-radio-dashboard.service",
+        ]
+        (generated_systemd / "network-radio-server.target").write_text(
+            render_target("Network Radio Server Stack", target_units, target_units),
+            encoding="utf-8",
+        )
     generated_dropins = ROOT / "generated" / "dropins"
     generated_dropins.mkdir(parents=True, exist_ok=True)
     for entry in manifest.get("dropins", {}).values():
@@ -166,6 +194,7 @@ def main() -> int:
                 f"ENABLE_RADIO_AUDIO={str(bool(services.get('radio_audio', True))).lower()}",
                 f"ENABLE_RADIO_AUDIO_STREAMER={str(bool(services.get('radio_audio_streamer', True))).lower()}",
                 f"ENABLE_NETWORK_RADIO_DASHBOARD={str(bool(services.get('network_radio_dashboard', True))).lower()}",
+                f"ENABLE_NETWORK_RADIO_SERVER_TARGET={str(bool(services.get('network_radio_server_target', True))).lower()}",
                 f"ENABLE_USBIPD={str(bool(services.get('usbipd', True))).lower()}",
                 f"ENABLE_USBIP_BIND={str(bool(services.get('usbip_bind', True))).lower()}",
                 f"ENABLE_USBIP_ATTACH={str(bool(services.get('usbip_attach', True))).lower()}",

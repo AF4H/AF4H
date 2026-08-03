@@ -23,8 +23,7 @@ additional radios and interfaces over time.
 2. Run `./deploy.sh` from the repo root on the host.
 3. Review `/etc/ser2net.conf`, `/etc/usbip/devices.conf`, and the enabled
    systemd units.
-4. Start the enabled services with `systemctl start usbipd usbip-bind ser2net \
-radio-audio radio-audio-streamer network-radio-dashboard`.
+4. Start the enabled services with `systemctl start network-radio-server.target`.
 
 If you prefer the browser workflow, the dashboard at `/` can edit the most
 common manifest fields, validate the result, then save, render, and apply from
