@@ -58,6 +58,14 @@ def run_capture(cmd: list[str]) -> dict:
     }
 
 
+def run_lines(cmd: list[str]) -> list[str]:
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True, check=True, cwd=str(ROOT))
+    except Exception:
+        return []
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+
+
 def unit_state(name: str) -> dict:
     active = run(["systemctl", "is-active", name]) or "unknown"
     enabled = run(["systemctl", "is-enabled", name]) or "unknown"
@@ -154,6 +162,67 @@ def manifest_summary(manifest: dict) -> dict:
         "systemd": manifest.get("systemd", {}),
         "dropins": manifest.get("dropins", {}),
         "rules": manifest.get("rules", {}),
+    }
+
+
+def _guess_serial_baud(device: str) -> int:
+    lower = device.lower()
+    if "ic-7100" in lower or "ft" in lower or "cp210" in lower:
+        return 19200 if "ic-7100" in lower else 115200
+    return 115200
+
+
+def discover_serial_ports() -> list[dict]:
+    ports: list[dict] = []
+    next_port = 7301
+    for device in sorted(Path("/dev/serial/by-id").glob("*")):
+        if not device.exists():
+            continue
+        name = device.name
+        port = next_port
+        next_port += 1
+        ports.append({
+            "device": str(device),
+            "label": name,
+            "port": port,
+            "baud": _guess_serial_baud(name),
+            "format": "8N1",
+            "flow": "-",
+            "notes": "detected serial device",
+            "include": True,
+        })
+    return ports
+
+
+def discover_audio_devices() -> list[dict]:
+    devices: list[dict] = []
+    cards = run_lines(["sh", "-lc", "cat /proc/asound/cards 2>/dev/null | sed -n 's/^ *\\([0-9][0-9]*\\) \\[.*\\]: .* - \\(.*\\)$/\\1|\\2/p'"])
+    for entry in cards:
+        try:
+            card_id, label = entry.split("|", 1)
+        except ValueError:
+            continue
+        devices.append({
+            "card": int(card_id),
+            "label": label,
+            "name": f"card{card_id}",
+            "include": True,
+        })
+    return devices
+
+
+def discover_usbip_devices() -> list[dict]:
+    devices: list[dict] = []
+    for line in run_lines(["lsusb"]):
+        devices.append({"description": line, "include": True})
+    return devices
+
+
+def discovery_bundle() -> dict:
+    return {
+        "serial_ports": discover_serial_ports(),
+        "audio_devices": discover_audio_devices(),
+        "usbip_devices": discover_usbip_devices(),
     }
 
 
@@ -270,11 +339,14 @@ def dashboard_page() -> bytes:
     <p class="muted">Manifest editor, live status, validation, and apply controls.</p>
     <div class="row" style="margin-bottom: 16px;">
       <button onclick="refreshAll()">Refresh</button>
+      <button class="secondary" onclick="discoverDevices()">Discover Devices</button>
+      <button class="secondary" onclick="runQuickWizard()">Quick Wizard</button>
       <button onclick="saveManifest()">Save Manifest</button>
       <button onclick="renderConfig()">Render Config</button>
       <button class="danger" onclick="applyConfig()">Apply / Restart</button>
     </div>
     <div id="validation" class="card" style="margin-bottom: 16px; display:none;"></div>
+    <div id="wizard-status" class="card" style="margin-bottom: 16px; display:none;"></div>
     <div class="grid">
       <section class="card">
         <h2>Editor</h2>
@@ -309,12 +381,27 @@ def dashboard_page() -> bytes:
             <div id="streamers"></div>
           </details>
           <details open>
+            <summary>Audio adapters</summary>
+            <div id="audio-adapters"></div>
+          </details>
+          <details open>
             <summary>Serial ports</summary>
             <div id="ser2net"></div>
           </details>
           <details open>
             <summary>USB/IP devices</summary>
             <div id="usbip-devices"></div>
+          </details>
+          <details open>
+            <summary>Discovery wizard</summary>
+            <div id="discovery" class="stack">
+              <p class="muted">Scan the host, review detected devices, and import the ones you want into the manifest.</p>
+              <div class="row">
+                <button class="secondary" type="button" onclick="importAllSerials()">Import all serials</button>
+                <button class="secondary" type="button" onclick="importAllAudio()">Import all audio</button>
+              </div>
+              <div id="discovery-results" class="stack"></div>
+            </div>
           </details>
           <details open>
             <summary>Service enables</summary>
@@ -338,7 +425,7 @@ def dashboard_page() -> bytes:
     </div>
   </main>
   <script>
-    const emptyManifest = {{ version: 1, defaults: {{}}, avahi: {{}}, services: {{}}, ser2net: [], usbip: {{}}, audio: {{ bridge: {{}}, streamers: [], transports: [] }}, systemd: {{}}, dropins: {{}}, rules: {{}} }};
+    const emptyManifest = {{ version: 1, defaults: {{}}, avahi: {{}}, services: {{}}, ser2net: [], usbip: {{}}, audio: {{ bridge: {{}}, streamers: [], transports: [], adapters: [] }}, systemd: {{}}, dropins: {{}}, rules: {{}} }};
     let currentManifest = null;
 
     async function fetchJSON(path, options) {{
@@ -406,6 +493,44 @@ def dashboard_page() -> bytes:
         </div>`;
     }}
 
+    function renderDiscoveryGroup(title, items, renderItem) {{
+      return `
+        <details open>
+          <summary>${{title}} (${{items.length}})</summary>
+          <div class="stack" style="margin-top: 10px;">
+            ${{items.length ? items.map(renderItem).join("") : '<div class="muted">Nothing detected.</div>'}}
+          </div>
+        </details>`;
+    }}
+
+    function renderDiscoverySerial(item, idx) {{
+      return `
+        <div class="item kv">
+          <label>${{item.label}}</label>
+          <div class="stack">
+            <div class="muted">${{item.device}}</div>
+            <div class="row">
+              <label><input type="checkbox" data-discovery-serial-include="${{idx}}" ${{item.include ? "checked" : ""}}> include</label>
+              <button class="secondary" type="button" onclick="addDiscoveredSerial(${{idx}})">Add to manifest</button>
+            </div>
+          </div>
+        </div>`;
+    }}
+
+    function renderDiscoveryAudio(item, idx) {{
+      return `
+        <div class="item kv">
+          <label>${{item.label}}</label>
+          <div class="stack">
+            <div class="muted">card ${{item.card}}</div>
+            <div class="row">
+              <label><input type="checkbox" data-discovery-audio-include="${{idx}}" ${{item.include ? "checked" : ""}}> include</label>
+              <button class="secondary" type="button" onclick="addDiscoveredAudio(${{idx}})">Add as audio adapter</button>
+            </div>
+          </div>
+        </div>`;
+    }}
+
     function populateForm(manifest) {{
       currentManifest = manifest;
       window.__manifest_json = JSON.stringify(manifest);
@@ -416,9 +541,35 @@ def dashboard_page() -> bytes:
       document.getElementById("avahi-description").value = manifest.avahi?.description || "";
       const streamers = manifest.audio?.streamers || [];
       document.getElementById("streamers").innerHTML = streamers.map(renderStreamerRow).join("") || '<div class="muted">No streamers defined.</div>';
+      document.getElementById("audio-adapters").innerHTML = (manifest.audio?.adapters || []).map((adapter, idx) => `
+        <div class="item kv">
+          <label>${{adapter.name || `adapter-${{idx}}`}}</label>
+          <input data-audio-adapter-field="name" data-index="${{idx}}" value="${{adapter.name || ""}}">
+        </div>`).join("") || '<div class="muted">No audio adapters defined.</div>';
       document.getElementById("ser2net").innerHTML = (manifest.ser2net || []).map(renderSer2netRow).join("") || '<div class="muted">No serial ports defined.</div>';
       document.getElementById("usbip-devices").innerHTML = (manifest.usbip?.devices || []).map(renderUsbipRow).join("") || '<div class="muted">No USB/IP devices defined.</div>';
       document.getElementById("services").innerHTML = Object.entries(manifest.services || {{}}).map(function(entry) {{ const name = entry[0]; const enabled = entry[1]; return renderServiceRow(name, enabled); }}).join("") || '<div class="muted">No services defined.</div>';
+    }}
+
+    function discoveryState() {{
+      return window.__discovery_json || {{ serial_ports: [], audio_devices: [], usbip_devices: [] }};
+    }}
+
+    function populateDiscovery(bundle) {{
+      window.__discovery_json = bundle;
+      const serial = renderDiscoveryGroup("Serial ports", bundle.serial_ports || [], renderDiscoverySerial);
+      const audio = renderDiscoveryGroup("Audio devices", bundle.audio_devices || [], renderDiscoveryAudio);
+      const usbip = renderDiscoveryGroup("USB/IP candidates", bundle.usbip_devices || [], (item) => `
+        <div class="item kv">
+          <label>${{item.label}}</label>
+          <div class="stack">
+            <div class="muted">${{item.path}}</div>
+            <div class="row">
+              <label><input type="checkbox" data-discovery-usbip-include="${{item.path}}" ${{item.include ? "checked" : ""}}> include</label>
+            </div>
+          </div>
+        </div>`);
+      document.getElementById("discovery-results").innerHTML = serial + audio + usbip;
     }}
 
     function collectManifest() {{
@@ -428,6 +579,7 @@ def dashboard_page() -> bytes:
       manifest.audio = manifest.audio || {{}};
       manifest.usbip = manifest.usbip || {{}};
       manifest.services = manifest.services || {{}};
+      manifest.audio.adapters = manifest.audio.adapters || [];
       manifest.audio.streamers = manifest.audio.streamers || [];
       manifest.ser2net = manifest.ser2net || [];
       manifest.usbip.devices = manifest.usbip.devices || [];
@@ -464,7 +616,77 @@ def dashboard_page() -> bytes:
       document.querySelectorAll("[data-service-name]").forEach((node) => {{
         manifest.services[node.dataset.serviceName] = node.value !== "false";
       }});
+      document.querySelectorAll("[data-audio-adapter-field]").forEach((node) => {{
+        const idx = Number(node.dataset.index);
+        if (!manifest.audio.adapters[idx]) return;
+        manifest.audio.adapters[idx][node.dataset.audioAdapterField] = node.value;
+      }});
       return manifest;
+    }}
+
+    function addDiscoveredSerial(idx) {{
+      const bundle = discoveryState();
+      const item = bundle.serial_ports?.[idx];
+      if (!item) return;
+      const manifest = getManifest();
+      manifest.ser2net = manifest.ser2net || [];
+      if (!manifest.ser2net.some((row) => row.device === item.device)) {{
+        manifest.ser2net.push({{ port: item.port || "", device: item.device, baud: item.baud, format: item.format, flow: item.flow, notes: item.notes }});
+      }}
+      populateForm(manifest);
+      currentManifest = manifest;
+    }}
+
+    function importAllSerials() {{
+      const bundle = discoveryState();
+      (bundle.serial_ports || []).forEach((_, idx) => addDiscoveredSerial(idx));
+    }}
+
+    function addDiscoveredAudio(idx) {{
+      const bundle = discoveryState();
+      const item = bundle.audio_devices?.[idx];
+      if (!item) return;
+      const manifest = getManifest();
+      manifest.audio = manifest.audio || {{}};
+      manifest.audio.adapters = manifest.audio.adapters || [];
+      if (!manifest.audio.adapters.some((row) => row.name === item.name)) {{
+        manifest.audio.adapters.push({{ name: item.name, card: item.card, label: item.label }});
+      }}
+      populateForm(manifest);
+      currentManifest = manifest;
+    }}
+
+    function importAllAudio() {{
+      const bundle = discoveryState();
+      (bundle.audio_devices || []).forEach((_, idx) => addDiscoveredAudio(idx));
+    }}
+
+    async function discoverDevices() {{
+      document.getElementById("apply").textContent = "Discovering devices…";
+      const bundle = await fetchJSON("/api/discover");
+      populateDiscovery(bundle);
+      document.getElementById("apply").textContent = JSON.stringify(bundle, null, 2);
+    }}
+
+    function showWizardStatus(message, detail) {{
+      const box = document.getElementById("wizard-status");
+      box.style.display = "block";
+      box.innerHTML = `<h2>Wizard</h2><p>${{message}}</p>${{detail ? `<pre>${{detail}}</pre>` : ""}}`;
+    }}
+
+    async function runQuickWizard() {{
+      showWizardStatus("Scanning host for likely serial ports and audio adapters...");
+      await discoverDevices();
+      importAllSerials();
+      importAllAudio();
+      const manifest = collectManifest();
+      currentManifest = manifest;
+      populateForm(manifest);
+      const serialCount = (manifest.ser2net || []).length;
+      const audioCount = (manifest.audio?.adapters || []).length;
+      showWizardStatus(`Staged ${{serialCount}} serial ports and ${{audioCount}} audio adapters. Review, then save and apply.`, JSON.stringify({{ serialCount, audioCount }}, null, 2));
+      document.getElementById("manifest").value = JSON.stringify(manifest, null, 2);
+      document.getElementById("validation").scrollIntoView({{ behavior: "smooth", block: "start" }});
     }}
 
     function showValidation(errors) {{
@@ -483,6 +705,7 @@ def dashboard_page() -> bytes:
       document.getElementById("manifest").value = raw;
       const parsed = JSON.parse(raw);
       populateForm(parsed);
+      await discoverDevices().catch(() => {{ document.getElementById("discovery-results").innerHTML = '<div class="muted">Discovery unavailable.</div>'; }});
       document.getElementById("status").textContent = JSON.stringify(await fetchJSON("/api/status"), null, 2);
       const validations = await fetchJSON("/api/validate");
       showValidation(validations.errors || []);
@@ -570,6 +793,14 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/api/validate":
             manifest = load_yaml(MANIFEST)
             self._json(200, {"ok": not validation_errors(manifest), "errors": validation_errors(manifest)})
+            return
+        if parsed.path == "/api/discover":
+            self._json(200, {
+                "ok": True,
+                "serial_ports": discover_serial_ports(),
+                "audio_devices": discover_audio_devices(),
+                "usbip_devices": discover_usbip_devices(),
+            })
             return
         self._json(404, {"ok": False, "error": "not found"})
 

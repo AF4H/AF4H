@@ -203,6 +203,8 @@ def main() -> int:
                 f"AUDIO_BRIDGE_ENABLED={str(bool(manifest.get('audio', {}).get('bridge', {}).get('enabled', True))).lower()}",
                 f"AUDIO_BRIDGE_MODE={manifest.get('audio', {}).get('bridge', {}).get('mode', 'placeholder')}",
                 f"AUDIO_BRIDGE_LOGGER_TAG={manifest.get('audio', {}).get('bridge', {}).get('logger_tag', 'radio-audio')}",
+                f"AUDIO_ADAPTER_COUNT={len(manifest.get('audio', {}).get('adapters', []))}",
+                "AUDIO_ADAPTERS=" + ",".join(a.get("name", "") for a in manifest.get("audio", {}).get("adapters", [])),
                 f"STREAMER_COUNT={len(manifest.get('audio', {}).get('streamers', []))}",
                 "AUDIO_STREAMERS=" + ",".join(s.get("name", "") for s in manifest.get("audio", {}).get("streamers", [])),
                 "AUDIO_TRANSPORTS=" + ",".join(t.get("name", "") for t in manifest.get("audio", {}).get("transports", [])),

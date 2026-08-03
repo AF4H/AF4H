@@ -59,6 +59,7 @@ audio:
     mode: placeholder
     logger_tag: radio-audio
     exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
+  adapters: []
   streamers:
     - name: wwh23_feed
       enabled: true
