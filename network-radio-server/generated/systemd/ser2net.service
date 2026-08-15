@@ -6,6 +6,12 @@ After=network.target
 Type=simple
 ExecStart=/usr/sbin/ser2net -n -c /etc/ser2net.conf
 Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+KillSignal=SIGTERM
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

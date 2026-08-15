@@ -20,6 +20,8 @@ The current editor is intentionally split:
 - structured inputs for the common fields
 - a raw manifest preview for review
 - validation feedback before writes are accepted
+- discovery helpers that can import serial, audio, and USB/IP candidates into
+  the manifest for review before saving
 
 Status includes:
 

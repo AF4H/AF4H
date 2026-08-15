@@ -87,6 +87,18 @@ def render_avahi_service(avahi: dict) -> str:
     )
 
 
+def unit_option_name(key: str) -> str:
+    mapping = {
+        "no_new_privileges": "NoNewPrivileges",
+        "private_tmp": "PrivateTmp",
+        "protect_system": "ProtectSystem",
+        "protect_home": "ProtectHome",
+        "kill_signal": "KillSignal",
+        "timeout_stop_sec": "TimeoutStopSec",
+    }
+    return mapping[key]
+
+
 def render_unit(name: str, unit: dict) -> str:
     lines = ["[Unit]", f"Description={unit['description']}"]
     after = unit.get("after", [])
@@ -110,6 +122,20 @@ def render_unit(name: str, unit: dict) -> str:
         lines.append(f"Restart={restart}")
     if "restart_sec" in unit:
         lines.append(f"RestartSec={unit['restart_sec']}")
+    for key in (
+        "no_new_privileges",
+        "private_tmp",
+        "protect_system",
+        "protect_home",
+        "kill_signal",
+        "timeout_stop_sec",
+    ):
+        if key not in unit:
+            continue
+        value = unit[key]
+        if isinstance(value, bool):
+            value = "yes" if value else "no"
+        lines.append(f"{unit_option_name(key)}={value}")
     lines.append("")
     lines.append("[Install]")
     lines.append("WantedBy=multi-user.target")
@@ -134,6 +160,13 @@ def render_text_block(content: str) -> str:
     return content.rstrip("\n") + "\n"
 
 
+def _streamer_by_exec_start(manifest: dict, exec_start: str) -> dict:
+    for row in manifest.get("audio", {}).get("streamers", []):
+        if row.get("exec_start") == exec_start:
+            return row
+    return {}
+
+
 def unit_filename(key: str) -> str:
     return f"{key.replace('_', '-')}.service"
 
@@ -143,6 +176,9 @@ def main() -> int:
     ser2net = render_ser2net(manifest.get("ser2net", []))
     usbip = render_usbip(manifest["usbip"])
     services = manifest.get("services", {})
+
+    for subdir in ("ser2net", "usbip", "avahi"):
+        (ROOT / subdir).mkdir(parents=True, exist_ok=True)
 
     (ROOT / "ser2net" / "port-map.tsv").write_text(
         "port\tdevice\tbaud\tformat\tflow\tnotes\n"
@@ -203,6 +239,11 @@ def main() -> int:
                 f"AUDIO_BRIDGE_ENABLED={str(bool(manifest.get('audio', {}).get('bridge', {}).get('enabled', True))).lower()}",
                 f"AUDIO_BRIDGE_MODE={manifest.get('audio', {}).get('bridge', {}).get('mode', 'placeholder')}",
                 f"AUDIO_BRIDGE_LOGGER_TAG={manifest.get('audio', {}).get('bridge', {}).get('logger_tag', 'radio-audio')}",
+                f"AUDIO_STREAMER_ENABLED={str(bool(_streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/WWH23-feed.sh').get('enabled', True))).lower()}",
+                f"AUDIO_STREAMER_LOGGER_TAG={_streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/WWH23-feed.sh').get('logger_tag', 'WWH23-feed')}",
+                f"SAME_ENABLED={str(bool(_streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/same-watch.sh').get('enabled', True) and _streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/same-act.sh').get('enabled', True))).lower()}",
+                f"SAME_WATCH_TAG={_streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/same-watch.sh').get('logger_tag', 'same-watch')}",
+                f"SAME_ACTION_TAG={_streamer_by_exec_start(manifest, '/opt/network-radio-server/audio/streamer/same-act.sh').get('logger_tag', 'same-act')}",
                 f"AUDIO_ADAPTER_COUNT={len(manifest.get('audio', {}).get('adapters', []))}",
                 "AUDIO_ADAPTERS=" + ",".join(a.get("name", "") for a in manifest.get("audio", {}).get("adapters", [])),
                 f"STREAMER_COUNT={len(manifest.get('audio', {}).get('streamers', []))}",

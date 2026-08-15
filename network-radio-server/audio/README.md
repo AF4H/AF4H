@@ -26,3 +26,12 @@ clever routing.
 
 Replace the placeholder loop with the real mixer/bridge once you pick the audio
 topology.
+
+Runtime guardrails currently in place:
+
+- the helpers refuse to start if `/opt/network-radio-server/generated.env` is missing
+- the systemd units run with `NoNewPrivileges=yes`, `PrivateTmp=yes`,
+  `ProtectSystem=strict`, `ProtectHome=yes`, `KillSignal=SIGTERM`, and
+  `TimeoutStopSec=15`
+- the long-running loops exit cleanly on `SIGTERM` so systemd can stop them
+  without waiting on a stale sleep

@@ -3,15 +3,31 @@
 set -euo pipefail
 
 INSTALL_ROOT="${INSTALL_ROOT:-/opt/network-radio-server}"
-source "${INSTALL_ROOT}/generated.env"
+LOG_TAG="${SAME_WATCH_TAG:-same-watch}"
+ENV_FILE="${INSTALL_ROOT}/generated.env"
+
+log() {
+    logger -t "$LOG_TAG" "$1"
+}
+
+die() {
+    log "fatal: $1"
+    exit 1
+}
+
+trap 'log "stopping on signal"; exit 0' INT TERM
+
+[[ -r "$ENV_FILE" ]] || die "missing runtime config: $ENV_FILE"
+source "$ENV_FILE"
 
 if [[ "${SAME_ENABLED:-true}" != "true" ]]; then
-    logger -t "${SAME_WATCH_TAG:-same-watch}" "SAME disabled by config"
+    log "SAME disabled by config"
     exit 0
 fi
 
-logger -t "${SAME_WATCH_TAG:-same-watch}" "starting SAME watch loop"
+log "starting SAME watch loop"
 
 while true; do
-    sleep 60
+    sleep 60 &
+    wait $!
 done

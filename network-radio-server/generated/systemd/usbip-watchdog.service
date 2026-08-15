@@ -8,6 +8,12 @@ Type=simple
 ExecStart=/usr/local/bin/usbip-watchdog.sh
 Restart=always
 RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+KillSignal=SIGTERM
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

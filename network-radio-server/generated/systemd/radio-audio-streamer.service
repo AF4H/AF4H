@@ -7,6 +7,12 @@ Type=simple
 ExecStart=/opt/network-radio-server/audio/streamer/WWH23-feed.sh
 Restart=always
 RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+KillSignal=SIGTERM
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

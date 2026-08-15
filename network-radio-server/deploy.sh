@@ -12,9 +12,19 @@ USBIP_CONF="${USBIP_CONF:-/etc/usbip/devices.conf}"
 CONFIG_RENDERER="${CONFIG_RENDERER:-$ROOT_DIR/render-config.py}"
 LOCAL_BIN_DIR="${LOCAL_BIN_DIR:-/usr/local/bin}"
 
+same_path() {
+  local left right
+  left="$(readlink -f "$1")"
+  right="$(readlink -f "$2")"
+  [[ "$left" == "$right" ]]
+}
+
 install_dir() {
   local src="$1"
   local dst="$2"
+  if same_path "$src" "$dst"; then
+    return 0
+  fi
   install -d "$(dirname "$dst")"
   install -m 0644 "$src" "$dst"
 }
@@ -22,6 +32,9 @@ install_dir() {
 install_tree() {
   local src_dir="$1"
   local dst_dir="$2"
+  if same_path "$src_dir" "$dst_dir"; then
+    return 0
+  fi
   install -d "$dst_dir"
   cp -a "$src_dir/." "$dst_dir/"
 }
@@ -29,6 +42,9 @@ install_tree() {
 install_file() {
   local src="$1"
   local dst="$2"
+  if same_path "$src" "$dst"; then
+    return 0
+  fi
   install -d "$(dirname "$dst")"
   install -m 0755 "$src" "$dst"
 }
@@ -38,6 +54,7 @@ echo "Installing network-radio-server bundle to ${INSTALL_ROOT}"
 install -d "$INSTALL_ROOT"
 install_tree "$ROOT_DIR/audio" "$INSTALL_ROOT/audio"
 install_tree "$ROOT_DIR/audio/streamer" "$INSTALL_ROOT/audio/streamer"
+install_tree "$ROOT_DIR/avahi" "$INSTALL_ROOT/avahi"
 install_tree "$ROOT_DIR/dashboard" "$INSTALL_ROOT/dashboard"
 install_tree "$ROOT_DIR/ser2net" "$INSTALL_ROOT/ser2net"
 install_tree "$ROOT_DIR/usbip" "$INSTALL_ROOT/usbip"
@@ -76,11 +93,11 @@ install_dir "$ROOT_DIR/generated/systemd/usbip-watchdog.service" "$SYSTEMD_DIR/u
 install_dir "$ROOT_DIR/generated/systemd/network-radio-server.target" "$SYSTEMD_DIR/network-radio-server.target"
 
 install -d "$LOCAL_BIN_DIR"
-install -m 0644 "$ROOT_DIR/generated.env" "$INSTALL_ROOT/generated.env"
-install -m 0755 "$ROOT_DIR/audio/radio-audio-bridge.sh" "$INSTALL_ROOT/audio/radio-audio-bridge.sh"
-install -m 0755 "$ROOT_DIR/audio/streamer/WWH23-feed.sh" "$INSTALL_ROOT/audio/streamer/WWH23-feed.sh"
-install -m 0755 "$ROOT_DIR/audio/streamer/same-act.sh" "$INSTALL_ROOT/audio/streamer/same-act.sh"
-install -m 0755 "$ROOT_DIR/audio/streamer/same-watch.sh" "$INSTALL_ROOT/audio/streamer/same-watch.sh"
+install_file "$ROOT_DIR/generated.env" "$INSTALL_ROOT/generated.env"
+install_file "$ROOT_DIR/audio/radio-audio-bridge.sh" "$INSTALL_ROOT/audio/radio-audio-bridge.sh"
+install_file "$ROOT_DIR/audio/streamer/WWH23-feed.sh" "$INSTALL_ROOT/audio/streamer/WWH23-feed.sh"
+install_file "$ROOT_DIR/audio/streamer/same-act.sh" "$INSTALL_ROOT/audio/streamer/same-act.sh"
+install_file "$ROOT_DIR/audio/streamer/same-watch.sh" "$INSTALL_ROOT/audio/streamer/same-watch.sh"
 install -m 0755 "$ROOT_DIR/usbip/usbip-bind.sh" "$LOCAL_BIN_DIR/usbip-bind.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-attach.sh" "$LOCAL_BIN_DIR/usbip-attach.sh"
 install -m 0755 "$ROOT_DIR/usbip/client/usbip-watchdog.sh" "$LOCAL_BIN_DIR/usbip-watchdog.sh"

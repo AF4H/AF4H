@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -213,8 +214,23 @@ def discover_audio_devices() -> list[dict]:
 
 def discover_usbip_devices() -> list[dict]:
     devices: list[dict] = []
-    for line in run_lines(["lsusb"]):
-        devices.append({"description": line, "include": True})
+    seen: set[str] = set()
+    for line in run_lines(["usbip", "list", "-l"]):
+        match = re.search(r"\b(\d+-[\d.]+)\b", line)
+        if not match:
+            continue
+        busid = match.group(1)
+        if busid in seen:
+            continue
+        seen.add(busid)
+        label = line.split(":", 1)[1].strip() if ":" in line else line.strip()
+        devices.append({
+            "busid": busid,
+            "description": line,
+            "label": label or line,
+            "name": label or line,
+            "include": True,
+        })
     return devices
 
 
@@ -399,6 +415,7 @@ def dashboard_page() -> bytes:
               <div class="row">
                 <button class="secondary" type="button" onclick="importAllSerials()">Import all serials</button>
                 <button class="secondary" type="button" onclick="importAllAudio()">Import all audio</button>
+                <button class="secondary" type="button" onclick="importAllUsbip()">Import all USB/IP</button>
               </div>
               <div id="discovery-results" class="stack"></div>
             </div>
@@ -531,10 +548,24 @@ def dashboard_page() -> bytes:
         </div>`;
     }}
 
+    function renderDiscoveryUsbip(item, idx) {{
+      return `
+        <div class="item kv">
+          <label>${{item.label || item.description || item.busid || "USB/IP device"}}</label>
+          <div class="stack">
+            <div class="muted">${{item.busid || "unknown busid"}}</div>
+            <div class="row">
+              <label><input type="checkbox" data-discovery-usbip-include="${{idx}}" ${{item.include ? "checked" : ""}}> include</label>
+              <button class="secondary" type="button" onclick="addDiscoveredUsbip(${{idx}})">Add to manifest</button>
+            </div>
+          </div>
+        </div>`;
+    }}
+
     function populateForm(manifest) {{
       currentManifest = manifest;
       window.__manifest_json = JSON.stringify(manifest);
-      document.getElementById("manifest").value = document.getElementById("manifest").value || JSON.stringify(manifest, null, 2);
+      document.getElementById("manifest").value = JSON.stringify(manifest, null, 2);
       document.getElementById("default-install-root").value = manifest.defaults?.install_root || "";
       document.getElementById("avahi-service-name").value = manifest.avahi?.service_name || "";
       document.getElementById("avahi-display-name").value = manifest.avahi?.display_name || "";
@@ -559,16 +590,7 @@ def dashboard_page() -> bytes:
       window.__discovery_json = bundle;
       const serial = renderDiscoveryGroup("Serial ports", bundle.serial_ports || [], renderDiscoverySerial);
       const audio = renderDiscoveryGroup("Audio devices", bundle.audio_devices || [], renderDiscoveryAudio);
-      const usbip = renderDiscoveryGroup("USB/IP candidates", bundle.usbip_devices || [], (item) => `
-        <div class="item kv">
-          <label>${{item.label}}</label>
-          <div class="stack">
-            <div class="muted">${{item.path}}</div>
-            <div class="row">
-              <label><input type="checkbox" data-discovery-usbip-include="${{item.path}}" ${{item.include ? "checked" : ""}}> include</label>
-            </div>
-          </div>
-        </div>`);
+      const usbip = renderDiscoveryGroup("USB/IP candidates", bundle.usbip_devices || [], renderDiscoveryUsbip);
       document.getElementById("discovery-results").innerHTML = serial + audio + usbip;
     }}
 
@@ -656,9 +678,28 @@ def dashboard_page() -> bytes:
       currentManifest = manifest;
     }}
 
+    function addDiscoveredUsbip(idx) {{
+      const bundle = discoveryState();
+      const item = bundle.usbip_devices?.[idx];
+      if (!item || !item.busid) return;
+      const manifest = getManifest();
+      manifest.usbip = manifest.usbip || {{}};
+      manifest.usbip.devices = manifest.usbip.devices || [];
+      if (!manifest.usbip.devices.some((row) => row.busid === item.busid)) {{
+        manifest.usbip.devices.push({{ busid: item.busid, name: item.label || item.description || item.busid, enabled: true }});
+      }}
+      populateForm(manifest);
+      currentManifest = manifest;
+    }}
+
     function importAllAudio() {{
       const bundle = discoveryState();
       (bundle.audio_devices || []).forEach((_, idx) => addDiscoveredAudio(idx));
+    }}
+
+    function importAllUsbip() {{
+      const bundle = discoveryState();
+      (bundle.usbip_devices || []).forEach((_, idx) => addDiscoveredUsbip(idx));
     }}
 
     async function discoverDevices() {{

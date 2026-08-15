@@ -41,6 +41,9 @@ class NetworkRadioServerTests(unittest.TestCase):
         text = DEPLOY.read_text(encoding="utf-8")
         self.assertIn("ENABLE_NETWORK_RADIO_SERVER_TARGET", text)
         self.assertIn("network-radio-server.target", text)
+        self.assertIn('install_tree "$ROOT_DIR/avahi" "$INSTALL_ROOT/avahi"', text)
+        self.assertIn("same_path()", text)
+        self.assertIn('left="$(readlink -f "$1")"', text)
 
     def test_target_file_wires_stack(self) -> None:
         text = TARGET.read_text(encoding="utf-8")
@@ -71,10 +74,19 @@ class NetworkRadioServerTests(unittest.TestCase):
             self.assertIn("ENABLE_NETWORK_RADIO_SERVER_TARGET=true", generated_env)
             self.assertIn("ENABLE_USBIPD=true", generated_env)
             self.assertIn("AUDIO_ADAPTER_COUNT=0", generated_env)
+            self.assertIn("AUDIO_STREAMER_ENABLED=true", generated_env)
+            self.assertIn("AUDIO_STREAMER_LOGGER_TAG=WWH23-feed", generated_env)
+            self.assertIn("SAME_ENABLED=true", generated_env)
+            self.assertIn("SAME_WATCH_TAG=same-watch", generated_env)
+            self.assertIn("SAME_ACTION_TAG=same-act", generated_env)
 
             target = (tmp / "generated/systemd/network-radio-server.target").read_text(encoding="utf-8")
             self.assertIn("Wants=usbipd.service usbip-bind.service usbip-attach.service usbip-watchdog.service ser2net.service radio-audio.service radio-audio-streamer.service network-radio-dashboard.service", target)
             self.assertIn("WantedBy=multi-user.target", target)
+            usbipd_unit = (tmp / "generated/systemd/usbipd.service").read_text(encoding="utf-8")
+            self.assertIn("ExecStart=/usr/sbin/usbipd -D -P /run/usbipd.pid", usbipd_unit)
+            self.assertNotIn("PIDFile=/run/usbipd.pid", usbipd_unit)
+            self.assertTrue((tmp / "avahi" / "radio-server.service").exists())
 
             manifest = yaml.safe_load((tmp / "config.yaml").read_text(encoding="utf-8"))
             self.assertIsInstance(manifest, dict)
@@ -85,8 +97,8 @@ class NetworkRadioServerTests(unittest.TestCase):
             joined = " ".join(cmd)
             if "asound/cards" in joined:
                 return ["0|USB Audio Adapter"]
-            if cmd == ["lsusb"]:
-                return ["Bus 001 Device 002: ID 1234:abcd AF4H Radio Adapter"]
+            if cmd == ["usbip", "list", "-l"]:
+                return [" - 1-1.2.4.1: AF4H USB Sound Adapter"]
             return []
 
         with mock.patch.object(self.module, "run_lines", side_effect=fake_run_lines), \
@@ -101,13 +113,36 @@ class NetworkRadioServerTests(unittest.TestCase):
         self.assertEqual(serials[0]["baud"], 115200)
         self.assertEqual(audio[0]["card"], 0)
         self.assertEqual(audio[0]["label"], "USB Audio Adapter")
-        self.assertEqual(usb[0]["description"], "Bus 001 Device 002: ID 1234:abcd AF4H Radio Adapter")
+        self.assertEqual(usb[0]["busid"], "1-1.2.4.1")
+        self.assertEqual(usb[0]["label"], "AF4H USB Sound Adapter")
+        self.assertEqual(usb[0]["name"], "AF4H USB Sound Adapter")
+        self.assertEqual(usb[0]["description"], " - 1-1.2.4.1: AF4H USB Sound Adapter")
 
     def test_dashboard_includes_quick_wizard(self) -> None:
         text = (ROOT / "dashboard" / "server.py").read_text(encoding="utf-8")
         self.assertIn("runQuickWizard()", text)
         self.assertIn("Quick Wizard", text)
         self.assertIn("wizard-status", text)
+        self.assertIn("data-discovery-usbip-include", text)
+        self.assertIn("addDiscoveredUsbip", text)
+        self.assertIn("importAllUsbip", text)
+        self.assertIn("renderDiscoveryUsbip", text)
+
+    def test_usbip_scripts_validate_config_and_use_literal_busid_match(self) -> None:
+        attach = (ROOT / "usbip" / "client" / "usbip-attach.sh").read_text(encoding="utf-8")
+        watchdog = (ROOT / "usbip" / "client" / "usbip-watchdog.sh").read_text(encoding="utf-8")
+        bind = (ROOT / "usbip" / "usbip-bind.sh").read_text(encoding="utf-8")
+
+        self.assertIn('CONFIG_FILE="${USBIP_CONFIG:-/etc/usbip/devices.conf}"', attach)
+        self.assertIn('CONFIG_FILE="${USBIP_CONFIG:-/etc/usbip/devices.conf}"', watchdog)
+        self.assertIn('PATH=/usr/sbin:/usr/bin:/sbin:/bin usbip list -r "$SERVER"', attach)
+        self.assertIn('skipped $BUSID; not present on $SERVER', attach)
+        self.assertIn('PATH=/usr/sbin:/usr/bin:/sbin:/bin usbip attach -r "$SERVER" -b "$BUSID" || true', attach)
+        self.assertIn('PATH=/usr/sbin:/usr/bin:/sbin:/bin usbip list -r "$SERVER"', watchdog)
+        self.assertIn('usbip bind -b "$busid" || true', bind)
+        self.assertIn('grep -Fq "$busid"', bind)
+        self.assertIn('missing SERVER in $CONFIG_FILE', attach)
+        self.assertIn('missing SERVER in $CONFIG_FILE', watchdog)
 
     @classmethod
     def setUpClass(cls) -> None:

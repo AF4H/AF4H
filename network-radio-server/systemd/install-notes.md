@@ -29,6 +29,11 @@ The deploy script renders `/etc/ser2net.conf` and `/etc/usbip/devices.conf`
 from `config.yaml` at install time, so the manifest is the thing to edit for
 port or device changes.
 
+The generated long-running services now include a shared hardening baseline
+(`NoNewPrivileges`, `PrivateTmp`, `ProtectSystem`, `ProtectHome`, `KillSignal`,
+and `TimeoutStopSec`) so the installed units stop cleanly and have less access
+to the host.
+
 The dashboard service is now an operator surface, not just a status stub. It
 can:
 

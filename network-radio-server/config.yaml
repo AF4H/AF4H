@@ -105,6 +105,12 @@ systemd:
       - network.target
     exec_start: /usr/sbin/ser2net -n -c /etc/ser2net.conf
     restart: on-failure
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
   network_radio_dashboard:
     description: Network Radio Dashboard
     after:
@@ -112,6 +118,12 @@ systemd:
     working_directory: /opt/network-radio-server/dashboard
     exec_start: /usr/bin/python3 /opt/network-radio-server/dashboard/server.py
     restart: on-failure
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
   radio_audio:
     description: Radio Audio Bridge
     after:
@@ -119,6 +131,12 @@ systemd:
       - network.target
     exec_start: /opt/network-radio-server/audio/radio-audio-bridge.sh
     restart: on-failure
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
   radio_audio_streamer:
     description: Weather Radio and Audio Streamer
     after:
@@ -127,14 +145,25 @@ systemd:
     exec_start: /opt/network-radio-server/audio/streamer/WWH23-feed.sh
     restart: always
     restart_sec: 5
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
   usbipd:
     description: USB/IP Daemon
     after:
       - network.target
-    exec_start: /usr/sbin/usbipd -D
+    exec_start: /usr/sbin/usbipd -D -P /run/usbipd.pid
     type: forking
-    pid_file: /run/usbipd.pid
     restart: on-failure
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
   usbip_bind:
     description: Bind USB/IP Devices
     after:
@@ -160,6 +189,12 @@ systemd:
     exec_start: /usr/local/bin/usbip-watchdog.sh
     restart: always
     restart_sec: 5
+    no_new_privileges: true
+    private_tmp: true
+    protect_system: strict
+    protect_home: true
+    kill_signal: SIGTERM
+    timeout_stop_sec: 15
 
 avahi:
   enabled: true

@@ -27,3 +27,16 @@ Keep environment-specific values out of the units when possible. Use the
 manifest and the generated config files for the device-specific details.
 `ser2net.conf`, `usbip/devices.conf`, the generated systemd units, and the
 generated drop-ins/rules are all derived from `config.yaml` during deployment.
+
+The generated long-running services now share a hardening baseline:
+
+- `NoNewPrivileges=yes`
+- `PrivateTmp=yes`
+- `ProtectSystem=strict`
+- `ProtectHome=yes`
+- `KillSignal=SIGTERM`
+- `TimeoutStopSec=15`
+
+That baseline applies to the audio bridge, streamer, dashboard, `ser2net`,
+`usbipd`, and `usbip-watchdog`, so they stop predictably and have less access
+to the host than they did before.

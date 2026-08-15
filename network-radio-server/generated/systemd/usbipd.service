@@ -4,9 +4,14 @@ After=network.target
 
 [Service]
 Type=forking
-ExecStart=/usr/sbin/usbipd -D
-PIDFile=/run/usbipd.pid
+ExecStart=/usr/sbin/usbipd -D -P /run/usbipd.pid
 Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+KillSignal=SIGTERM
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

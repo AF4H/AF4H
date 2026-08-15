@@ -6,6 +6,12 @@ After=sound.target network.target
 Type=simple
 ExecStart=/opt/network-radio-server/audio/radio-audio-bridge.sh
 Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+KillSignal=SIGTERM
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

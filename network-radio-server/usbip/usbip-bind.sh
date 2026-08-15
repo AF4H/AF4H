@@ -22,7 +22,7 @@ if [[ "${#DEVICES[@]}" -eq 0 ]]; then
 fi
 
 for busid in "${DEVICES[@]}"; do
-  if usbip list -r "$SERVER" 2>/dev/null | grep -q "$busid"; then
+  if usbip list -r "$SERVER" 2>/dev/null | grep -Fq "$busid"; then
     usbip bind -b "$busid" || true
     echo "bound $busid"
   else
