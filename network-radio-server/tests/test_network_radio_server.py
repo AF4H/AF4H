@@ -42,6 +42,7 @@ class NetworkRadioServerTests(unittest.TestCase):
         self.assertIn("ENABLE_NETWORK_RADIO_SERVER_TARGET", text)
         self.assertIn("network-radio-server.target", text)
         self.assertIn('install_tree "$ROOT_DIR/avahi" "$INSTALL_ROOT/avahi"', text)
+        self.assertIn('install_dir "$ROOT_DIR/ser2net/ser2net.conf.example" "$SER2NET_CONF"', text)
         self.assertIn("same_path()", text)
         self.assertIn('left="$(readlink -f "$1")"', text)
 
@@ -86,6 +87,7 @@ class NetworkRadioServerTests(unittest.TestCase):
             usbipd_unit = (tmp / "generated/systemd/usbipd.service").read_text(encoding="utf-8")
             self.assertIn("ExecStart=/usr/sbin/usbipd -D -P /run/usbipd.pid", usbipd_unit)
             self.assertNotIn("PIDFile=/run/usbipd.pid", usbipd_unit)
+            self.assertTrue((tmp / "ser2net" / "ser2net.conf.example").exists())
             self.assertTrue((tmp / "avahi" / "radio-server.service").exists())
 
             manifest = yaml.safe_load((tmp / "config.yaml").read_text(encoding="utf-8"))
