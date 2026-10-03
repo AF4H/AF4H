@@ -32,7 +32,7 @@ def main():
  for r in rows:
   if len(r)<9: continue
   office=clean(r[0]); host=clean(r[8]); ip=clean(r[2]);
-  if office and re.fullmatch(r'\\d+',office): pbx.append({'office':office,'host':host,'ip':ip,'location':clean(r[3])})
+  if office and re.fullmatch(r'\d+',office): pbx.append({'office':office,'host':host,'ip':ip,'location':clean(r[3])})
  peers=[]
  for name,opt in parse_iax(args.iax_config).items():
   host=opt.get('host',''); typ=opt.get('type','');
