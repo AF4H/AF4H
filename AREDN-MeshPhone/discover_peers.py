@@ -64,7 +64,7 @@ def main():
    except EOFError: answer='n'
    if answer not in ('y','yes'): print('Not written'); return 2
   os.makedirs(os.path.dirname(args.output) or '.',exist_ok=True)
-  with open(args.output,'w') as f: json.dump(result,f,indent=2); f.write('\\n')
+  with open(args.output,'w') as f: json.dump(result,f,indent=2); f.write('\n')
   print('Wrote',args.output)
  return 0
 if __name__=='__main__': raise SystemExit(main())

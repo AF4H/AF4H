@@ -7,7 +7,7 @@ STATUS=pathlib.Path('/var/lib/meshphone-router/status.json')
 def atomic_json(path,data):
  path.parent.mkdir(parents=True,exist_ok=True)
  fd,tmp=tempfile.mkstemp(prefix='meshphone-',dir=str(path.parent),text=True)
- with os.fdopen(fd,'w') as f: json.dump(data,f,indent=2); f.write('\\n')
+ with os.fdopen(fd,'w') as f: json.dump(data,f,indent=2); f.write('\n')
  os.replace(tmp,path)
 def main():
  now=datetime.datetime.now(datetime.timezone.utc).isoformat()
