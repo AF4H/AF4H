@@ -1,9 +1,21 @@
 {
-  "local_office": "LOCAL_OFFICE_CODE",
+  "_comment": "Use only direct next-hop office codes that have matching local IAX2 peers.",
+  "local_office": "40423",
   "peers": {
-    "NEXT_HOP_OFFICE_CODE": {
-      "peer": "local-iax-peer-name",
-      "enabled": true
+    "93710": {
+      "peer": "nc8q",
+      "enabled": true,
+      "_comment": "Example first-hop mapping: office 93710 is reached through the local IAX2 peer nc8q. Replace this with your own mapping."
+    },
+    "97321": {
+      "peer": "neighbor-97321",
+      "enabled": true,
+      "_comment": "Example second peer; replace the peer name with a locally configured IAX2 peer."
+    },
+    "13163": {
+      "peer": "neighbor-13163",
+      "enabled": false,
+      "_comment": "Example disabled peer. Enable only after configuring and testing the local IAX2 peer."
     }
   }
 }
