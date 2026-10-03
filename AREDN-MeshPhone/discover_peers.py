@@ -38,7 +38,7 @@ def main():
   host=opt.get('host',''); typ=opt.get('type','');
   if not host or host.lower() in ('dynamic','') or name.lower() in ('general','system'): continue
   peers.append({'peer':name,'host':host,'username':opt.get('username',''),'type':typ})
- result={'local_office':str(args.local_office),'peers':{}}
+ result={'local_office':str(args.local_office),'peers':{},'matched':[],'unmatched':[]}
  print('MeshPhone peer discovery'); print('Local office:',args.local_office); print('IAX peers found:',len(peers)); print()
  unmatched=[]
  for peer in peers:
@@ -54,9 +54,9 @@ def main():
    if score: candidates.append((score,row))
   candidates.sort(key=lambda x:x[0],reverse=True)
   if candidates and (len(candidates)==1 or candidates[0][0]>candidates[1][0]):
-   score,row=candidates[0]; result['peers'][row['office']]={'peer':peer['peer'],'enabled':True}; print('MATCHED',peer['peer'],'host=',peer['host'],'office=',row['office'],'pbx=',row['host'] or row['location'],'confidence=',('high' if score>=95 else 'medium'))
+   score,row=candidates[0]; confidence='high' if score>=95 else 'medium'; result['peers'][row['office']]={'peer':peer['peer'],'enabled':True}; result['matched'].append({'peer':peer['peer'],'host':peer['host'],'office':row['office'],'confidence':confidence}); print('MATCHED',peer['peer'],'host=',peer['host'],'office=',row['office'],'pbx=',row['host'] or row['location'],'confidence=',confidence)
   else:
-   unmatched.append(peer); print('UNMATCHED',peer['peer'],'host=',peer['host'],'reason=no unique PBX match')
+   unmatched.append(peer); result['unmatched'].append({'peer':peer['peer'],'host':peer['host'],'reason':'no unique PBX match'}); print('UNMATCHED',peer['peer'],'host=',peer['host'],'reason=no unique PBX match')
  print(); print('UNMATCHED COUNT:',len(unmatched))
  if args.output:
   if not args.yes:
