@@ -1,0 +1,13 @@
+<module>
+  <rawname>meshphonealerts</rawname>
+  <name>MeshPhone Alerts</name>
+  <version>17.0.1</version>
+  <publisher>AF4H</publisher>
+  <license>MIT</license>
+  <category>Reports</category>
+  <description>Displays MeshPhone peer discovery and route-builder status.</description>
+  <menuitems>
+    <meshphonealerts>MeshPhone Alerts</meshphonealerts>
+  </menuitems>
+  <supported><version>17.0</version></supported>
+</module>

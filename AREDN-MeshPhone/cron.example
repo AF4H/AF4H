@@ -1,0 +1,2 @@
+# Discover local IAX peers, update mappings, rebuild MeshPhone routes, and refresh admin status.
+17 3 * * 0 root /opt/meshphone-router/refresh.py >>/var/log/meshphone-routebuilder.log 2>&1
