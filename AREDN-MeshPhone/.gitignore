@@ -1,0 +1,4 @@
+peers.json
+*.local.json
+*.conf
+__pycache__/

@@ -1,0 +1,9 @@
+{
+  "local_office": "LOCAL_OFFICE_CODE",
+  "peers": {
+    "NEXT_HOP_OFFICE_CODE": {
+      "peer": "local-iax-peer-name",
+      "enabled": true
+    }
+  }
+}
