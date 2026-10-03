@@ -12,13 +12,13 @@ class Table(html.parser.HTMLParser):
   elif t=='tr' and self.r is not None:
    if self.r: self.rows.append(self.r)
    self.r=None
-def clean(v): return re.sub(r'\\s+',' ',v).strip()
+def clean(v): return re.sub(r'\s+',' ',v).strip()
 def parse_iax(path):
  sections={}; section=None
  for raw in open(path,errors='replace'):
   line=raw.split(';',1)[0].strip()
   if not line: continue
-  m=re.match(r'^\\[([^]]+)\\]$',line)
+  m=re.match(r'^\[([^]]+)\]$',line)
   if m: section=m.group(1).strip(); sections[section]={}; continue
   if section and '=' in line:
    k,v=line.split('=',1); sections[section][k.strip().lower()]=v.strip()
