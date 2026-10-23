@@ -50,10 +50,11 @@ function qrzRecord($call,$private){
    return ['address'=>$address,'lat'=>isset($c->lat)?(float)$c->lat:null,'lng'=>isset($c->lon)?(float)$c->lon:null,'email'=>trim((string)$c->email)];
   }fail('QRZ session expired. Please try again.',502);
 }
+require_once __DIR__.'/core.php';
 try{
  $private=dirname(__DIR__,2).'/private/gapacket';
  if(!is_dir($private))throw new RuntimeException('Storage missing');
- $db=new PDO('sqlite:'.$private.'/stations.sqlite');$db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);$db->exec('PRAGMA busy_timeout=5000');
+ $db=new PDO('sqlite:'.$private.'/stations.sqlite');$db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);$db->exec('PRAGMA busy_timeout=5000');appSchema($db);
  $db->exec('CREATE TABLE IF NOT EXISTS stations (callsign TEXT PRIMARY KEY,address TEXT NOT NULL,status TEXT NOT NULL,lat REAL NOT NULL,lng REAL NOT NULL,edit_hash TEXT NOT NULL,updated TEXT NOT NULL)');
  $db->exec('CREATE TABLE IF NOT EXISTS limits (ip TEXT PRIMARY KEY,window INTEGER,n INTEGER)');
  $db->exec('CREATE TABLE IF NOT EXISTS pending (id TEXT PRIMARY KEY, callsign TEXT NOT NULL, payload TEXT NOT NULL, baseline TEXT NOT NULL, recipient TEXT NOT NULL, expires INTEGER NOT NULL, created INTEGER NOT NULL)');
@@ -62,7 +63,7 @@ try{
   require_once __DIR__.'/link-data.php';ensureLinkSchema($db);
   $stations=$db->query('SELECT callsign,status,lat,lng,updated FROM stations ORDER BY callsign')->fetchAll(PDO::FETCH_ASSOC);
   $links=publicLinkData($db,time());
-  reply(['csrf'=>$_SESSION['csrf'],'stations'=>$stations,'links'=>$links,'revision'=>hash('sha256',json_encode([$stations,$links])),'server_time'=>gmdate('c')]);
+  reply(['csrf'=>$_SESSION['csrf'],'stations'=>$stations,'links'=>$links,'revision'=>hash('sha256',json_encode([$stations,$links,$db->query('SELECT MAX(id) FROM metric_samples')->fetchColumn(),$db->query("SELECT MAX(id) FROM audit WHERE entity_type=\"station\"")->fetchColumn()])),'server_time'=>gmdate('c')]);
  }
  if($_SERVER['REQUEST_METHOD']!=='POST')fail('POST required',405);
  $input=json_decode(file_get_contents('php://input'),true);if(!is_array($input))fail('Invalid request');
@@ -111,4 +112,5 @@ try{
  reply(['pending'=>true,'fallback'=>$fallback,'message'=>$fallback?'Confirmation sent to af4h@af4h.net for review because QRZ has no email on file. The map stays unchanged until approved.':'Confirmation sent to the QRZ email on file for your base callsign. The map stays unchanged until approved.']);
 
 }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();error_log('GAPacket: '.$e->getMessage());fail('The server could not complete the request. Please try again.',500);}
+
 
