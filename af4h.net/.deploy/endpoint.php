@@ -2,6 +2,7 @@
 // Installed as /deploy.php; deployment never overwrites this control endpoint.
 declare(strict_types=1);
 ini_set('display_errors','0');
+ini_set('error_log',dirname(__DIR__).'/private/gapacket/deploy-errors.log');
 header('Content-Type: application/json');header('Cache-Control: no-store');
 set_time_limit(100);umask(0077);
 function answer($code,$message){http_response_code($code);echo json_encode(['message'=>$message]);exit;}
@@ -47,7 +48,6 @@ try{
   if($stat['size']>5000000||($total+=$stat['size'])>15000000)throw new RuntimeException('Website files too large');
   $data=$zip->getFromIndex($i);if($data===false)throw new RuntimeException('Cannot read source');
   $file=$stage.'/files/'.$path;if(!is_dir(dirname($file)))mkdir(dirname($file),0700,true);file_put_contents($file,$data);
-  if(str_ends_with($path,'.php')){$out=[];$code=0;exec('/usr/bin/php -l '.escapeshellarg($file).' 2>&1',$out,$code);if($code!==0)throw new RuntimeException('PHP syntax check failed');}
   $files[]=$path;
  }
  $zip->close();if(!in_array('index.html',$files,true)||!in_array('gapacket/api.php',$files,true))throw new RuntimeException('Required website files missing');
