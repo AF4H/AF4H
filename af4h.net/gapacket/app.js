@@ -61,14 +61,14 @@ function render(){
  stations.forEach(s=>{
   L.circleMarker([s.lat,s.lng],{radius:8,color:'#fff',weight:2,fillColor:colors[s.status],fillOpacity:1}).addTo(layer)
    .bindTooltip(()=>stationDetails(s),{className:'connectivity-tooltip',direction:'auto',interactive:true})
-   .bindPopup(()=>stationDetails(s),{className:'connectivity-popup',minWidth:280,maxWidth:360});
+   .on('click',()=>openStationHistory(s.callsign));
  });
  $('count').textContent=stations.length+' stations · '+plotted+' plotted links · '+stations.filter(s=>s.status==='online').length+' online stations';
 }
 async function refresh(){
  if(refreshing)return;refreshing=true;
  try{const d=await api('list');csrf=d.csrf;
-  if(revision!==d.revision){revision=d.revision;stations=d.stations;links=d.links||[];render();}
+  if(revision!==d.revision){revision=d.revision;stations=d.stations;links=d.links||[];render();if(typeof historyDialog!=='undefined'&&historyDialog?.open&&historyStation)loadStationHistory(historyStation);}
   $('sync').textContent='Auto-refresh every 5s · checked '+new Date().toLocaleTimeString();
  }catch(e){$('sync').textContent='Refresh failed; retrying automatically.';throw e;}finally{refreshing=false;}
 }
@@ -106,3 +106,4 @@ window.addEventListener('focus',()=>refresh().catch(()=>{}));
 
 function updateRemovalMode(){const removing=document.querySelector('[name=status]:checked').value==='remove';$('address').required=!removing;$('address').disabled=removing;$('save').textContent=removing?'Email removal confirmation':'Email confirmation';}
 document.querySelectorAll('[name=status]').forEach(r=>r.addEventListener('change',updateRemovalMode));updateRemovalMode();
+
