@@ -5,7 +5,17 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribu
 let confirmedCall='',csrf='',pin=null,stations=[],layer=L.layerGroup().addTo(map), busy=false;
 const call=()=>$('callsign').value.trim().toUpperCase();
 const validCall=/^(?:[KNW][0-9][A-Z]{1,3}|(?:A[A-L]|[KNW][A-Z])[0-9][A-Z]{1,3})(?:\/[0-9]{1,2})?$/;
-function validateCall(){if(!validCall.test(call()))throw Error('Enter your assigned US callsign, optionally followed by /0 through /99. N0CALL is a placeholder only.');}
+const callsignError='Enter a US callsign with a K, N, W, or AA–AL prefix, one digit, and 1–3 suffix letters. An optional station number is /0 through /99.';
+function showCallError(show=true){
+ const invalid=!validCall.test(call()),field=$('callsign'),error=$('callsign-error');
+ error.textContent=show&&invalid?callsignError:'';error.hidden=!(show&&invalid);
+ field.setAttribute('aria-invalid',show&&invalid?'true':'false');
+ field.setCustomValidity(invalid?callsignError:'');return !invalid;
+}
+function validateCall(){if(!showCallError()){ $('callsign').focus();throw Error(callsignError);}}
+$('callsign').addEventListener('blur',()=>showCallError(call()!==''));
+$('callsign').addEventListener('invalid',e=>{e.preventDefault();showCallError();$('callsign').focus();});
+$('station').addEventListener('invalid',()=>{showCallError(call()!=='' );},true);
 function message(t){$('message').textContent=t}
 async function api(action,data={}){if(action!=='list')validateCall();const r=await fetch('api.php?action='+action,action==='list'?{cache:'no-store'}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,csrf})});let d;try{d=await r.json()}catch{throw Error('The server returned an unreadable response.')}if(!r.ok){const e=Error(d.error||'Request failed');e.code=d.code;throw e;}return d}
 function point(lat,lng,zoom=false){if(pin)pin.setLatLng([lat,lng]);else pin=L.marker([lat,lng],{draggable:true}).addTo(map).bindTooltip('Your station — drag to adjust');if(zoom)map.setView([lat,lng],13)}
@@ -23,8 +33,9 @@ $('lookup').onclick=()=>run(async()=>{
  else{if(pin){pin.remove();pin=null}message('Address loaded. Click the map to place your station.');}
 });
 $('address').addEventListener('input',()=>{if(pin){pin.remove();pin=null}message('Address changed. Click the map to confirm the new station location.')});
-$('callsign').addEventListener('input',()=>{confirmedCall='';$('address').value='';if(pin){pin.remove();pin=null}});
+$('callsign').addEventListener('input',()=>{showCallError(call()!=='');confirmedCall='';$('address').value='';if(pin){pin.remove();pin=null}});
 $('station').onsubmit=e=>{e.preventDefault();run(async()=>{
+ validateCall();
  if(!pin)throw Error('Click the map to confirm your station location.');
  const stationCall=call(),p=pin.getLatLng(),payload={callsign:stationCall,address:$('address').value,status:document.querySelector('[name=status]:checked').value,lat:p.lat,lng:p.lng,confirm_update:confirmedCall===stationCall};
  try{await api('save',payload);}catch(e){
