@@ -40,7 +40,8 @@ try{
   $key=apcu_fetch('gapacket_qrz_session');
   for($i=0;$i<2;$i++){
    if(!$key){$login=remoteXml(['username'=>$config['qrz_username'],'password'=>$config['qrz_password'],'agent'=>'AF4H-GAPacket-1.0']);$key=(string)$login->Session->Key;if(!$key)fail('QRZ login failed. The site owner needs to check the subscription and credentials.',502);apcu_store('gapacket_qrz_session',$key,3600);}
-   $x=remoteXml(['s'=>$key,'callsign'=>$call]);$error=(string)$x->Session->Error;
+   $lookupCall=preg_replace('~/[0-9]+$~','',$call);
+   $x=remoteXml(['s'=>$key,'callsign'=>$lookupCall]);$error=(string)$x->Session->Error;
    if($error&&preg_match('/session|timeout/i',$error)){$key=false;apcu_delete('gapacket_qrz_session');continue;}
    if($error)fail('QRZ could not find this callsign or return its address.',404);
    $c=$x->Callsign;$address=implode(', ',array_filter([(string)$c->addr1,(string)$c->addr2,trim((string)$c->state.' '.(string)$c->zip),(string)$c->country]));
@@ -48,19 +49,24 @@ try{
    reply(['address'=>$address,'lat'=>isset($c->lat)?(float)$c->lat:null,'lng'=>isset($c->lon)?(float)$c->lon:null]);
   }fail('QRZ session expired. Please try again.',502);
  }
- $token=(string)($input['token']??'');
- if(strlen($token)>200)fail('Invalid edit key');
- $q=$db->prepare('SELECT edit_hash,address FROM stations WHERE callsign=?');$q->execute([$call]);$existing=$q->fetch(PDO::FETCH_ASSOC);
- if($existing&&!password_verify($token,$existing['edit_hash']))fail('This callsign already has a marker. Enter its private edit key to change it.',403);
- if($action==='mine'){if(!$existing)fail('No saved station found.',404);reply(['address'=>$existing['address']]);}
- if($action==='delete'){if(!$existing)fail('No saved station found.',404);$q=$db->prepare('DELETE FROM stations WHERE callsign=?');$q->execute([$call]);reply(['ok'=>true]);}
+ $q=$db->prepare('SELECT callsign,status,lat,lng,updated FROM stations WHERE callsign=?');$q->execute([$call]);$existing=$q->fetch(PDO::FETCH_ASSOC);
+ if($action==='check')reply(['exists'=>(bool)$existing,'station'=>$existing?:null]);
+ if($action==='delete'){
+  if(!$existing)fail('No saved station found.',404);
+  $q=$db->prepare('SELECT edit_hash FROM stations WHERE callsign=?');$q->execute([$call]);
+  if(!password_verify((string)($input['token']??''),(string)$q->fetchColumn()))fail('Station removal requires its original private edit key.',403);
+  $q=$db->prepare('DELETE FROM stations WHERE callsign=?');$q->execute([$call]);reply(['ok'=>true]);
+ }
  if($action!=='save')fail('Unknown action',404);
  $address=trim((string)($input['address']??''));$status=$input['status']??'';$lat=$input['lat']??null;$lng=$input['lng']??null;
  if(!$address||strlen($address)>500)fail('Enter an address (500 characters maximum).');
  if(!in_array($status,['online','ready','interested'],true))fail('Choose a status.');
  if(!is_numeric($lat)||!is_numeric($lng)||$lat < -90||$lat >90||$lng < -180||$lng >180)fail('Place your pin on the map.');
- if(!$existing)$token=bin2hex(random_bytes(24));
- $db->beginTransaction();$q=$db->prepare('SELECT edit_hash FROM stations WHERE callsign=?');$q->execute([$call]);$current=$q->fetchColumn();
- if($current&&!password_verify($token,$current)){$db->rollBack();fail('This callsign was just registered. An edit key is required.',409);}
- $q=$db->prepare('INSERT OR REPLACE INTO stations VALUES (?,?,?,?,?,?,?)');$q->execute([$call,$address,$status,(float)$lat,(float)$lng,$current?:password_hash($token,PASSWORD_DEFAULT),gmdate('c')]);$db->commit();reply(['ok'=>true,'token'=>$token]);
+ $db->beginTransaction();$q=$db->prepare('SELECT 1 FROM stations WHERE callsign=?');$q->execute([$call]);$current=$q->fetchColumn();
+ if($current&&($input['confirm_update']??false)!==true){$db->rollBack();reply(['error'=>'Callsign already registered. Update?','code'=>'already_registered'],409);}
+ // Retain the legacy column for existing databases; edits no longer use keys.
+ $q=$db->prepare('INSERT INTO stations (callsign,address,status,lat,lng,edit_hash,updated) VALUES (?,?,?,?,?,?,?) ON CONFLICT(callsign) DO UPDATE SET address=excluded.address,status=excluded.status,lat=excluded.lat,lng=excluded.lng,updated=excluded.updated');
+ $q->execute([$call,$address,$status,(float)$lat,(float)$lng,'',gmdate('c')]);$db->commit();reply(['ok'=>true]);
+
 }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();error_log('GAPacket: '.$e->getMessage());fail('The server could not complete the request. Please try again.',500);}
+
