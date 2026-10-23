@@ -58,7 +58,12 @@ try{
  $db->exec('CREATE TABLE IF NOT EXISTS limits (ip TEXT PRIMARY KEY,window INTEGER,n INTEGER)');
  $db->exec('CREATE TABLE IF NOT EXISTS pending (id TEXT PRIMARY KEY, callsign TEXT NOT NULL, payload TEXT NOT NULL, baseline TEXT NOT NULL, recipient TEXT NOT NULL, expires INTEGER NOT NULL, created INTEGER NOT NULL)');
  $action=$_GET['action']??'list';
- if($action==='list')reply(['csrf'=>$_SESSION['csrf'],'stations'=>$db->query('SELECT callsign,status,lat,lng,updated FROM stations ORDER BY callsign')->fetchAll(PDO::FETCH_ASSOC)]);
+ if($action==='list'){
+  require_once __DIR__.'/link-data.php';ensureLinkSchema($db);
+  $stations=$db->query('SELECT callsign,status,lat,lng,updated FROM stations ORDER BY callsign')->fetchAll(PDO::FETCH_ASSOC);
+  $links=publicLinkData($db,time());
+  reply(['csrf'=>$_SESSION['csrf'],'stations'=>$stations,'links'=>$links,'revision'=>hash('sha256',json_encode([$stations,$links])),'server_time'=>gmdate('c')]);
+ }
  if($_SERVER['REQUEST_METHOD']!=='POST')fail('POST required',405);
  $input=json_decode(file_get_contents('php://input'),true);if(!is_array($input))fail('Invalid request');
  if(!hash_equals($_SESSION['csrf'],(string)($input['csrf']??'')))fail('Refresh the page and try again.',403);
