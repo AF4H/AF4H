@@ -2,9 +2,9 @@
 
 The public read API (`gapacket/api.php?action=list`) returns approved stations, link records, a revision hash, and server time. Browsers check every five seconds while visible and on focus. Unchanged revisions preserve popups and avoid rebuilding the map; time-based state transitions also change the revision. Approved additions, edits, removals, and link updates therefore appear on open maps within about five seconds, subject to network latency.
 
-## Future push API (not implemented)
+## Authenticated push API
 
-No public ingestion endpoint or credentials have been created. The future authenticated push endpoint can upsert records into the private SQLite database's `node_links` table. It must not add stations or bypass the existing email approval flow. Payload validation, authorization, request limits, stale update rejection, and idempotency belong in that endpoint.
+The scoped endpoint `POST /gapacket/telemetry.php` is now available. Sysops create and revoke reporter keys in `/gapacket/sysop.php`; an API key does not grant sysop access or permission to change station registrations. See [SYSOP.md](SYSOP.md) for authentication, payloads, scope restrictions, history, and metric reporting.
 
 Proposed record:
 ```json
