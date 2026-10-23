@@ -15,7 +15,7 @@ try{
    appReply(['stations'=>$stations,'links'=>publicLinkData($db,time()),'sysops'=>$sysops,'keys'=>$keys]);
   }
   if($action==='audit'){
-   $cursor=max(0,(int)($_GET['before']??0));$q=$db->prepare('SELECT * FROM audit WHERE (?=0 OR id<?) ORDER BY id DESC LIMIT 100');$q->execute([$cursor,$cursor]);$rows=$q->fetchAll(PDO::FETCH_ASSOC);appReply(['events'=>$rows,'next_before'=>count($rows)===100?(int)end($rows)['id']:null]);
+   $cursor=max(0,(int)($_GET['before']??0));$q=$db->prepare('SELECT * FROM audit WHERE id<? ORDER BY id DESC LIMIT 100');$q->bindValue(1,$cursor?:PHP_INT_MAX,PDO::PARAM_INT);$q->execute();$rows=$q->fetchAll(PDO::FETCH_ASSOC);appReply(['events'=>$rows,'next_before'=>count($rows)===100?(int)end($rows)['id']:null]);
   }appFail('Unknown action.',404);
  }
  if($_SERVER['REQUEST_METHOD']!=='POST')appFail('POST required.',405);
