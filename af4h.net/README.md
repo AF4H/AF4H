@@ -29,7 +29,7 @@ The API resolves this private directory relative to its deployment path. Preserv
 
 QRZ fills an editable address and coordinates when available. Changed addresses require the operator to place a pin manually; no address geocoding service is configured. Public station data includes callsign, coordinates, status, and update time. Street addresses and edit-key hashes are excluded from public responses.
 
-First registration returns a private edit key, stored in the operator's browser and displayed for safekeeping. The key is required to update or remove a station. Callsigns are self-reported: QRZ lookup does not verify operator ownership. Shared workstations should be used with care because the browser retains edit keys.
+Additions need no edit key. Updating an existing station requires confirming the popup; anyone can confirm an update, and callsign ownership is self-reported. Additional IDs such as AF4H/14 are separate stations, with QRZ lookup using AF4H for a trailing numeric suffix. Stored street addresses are excluded from public responses, and lookup refills the address from QRZ. Deletion remains protected by the original edit key and is no longer offered in the interface. Existing database records are preserved. Email verification is a deferred idea and is not implemented.
 
 The map uses Leaflet and OpenStreetMap tiles with attribution. Statuses are Online (green), Ready (blue), and Interested (amber).
 
