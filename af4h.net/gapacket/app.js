@@ -32,11 +32,6 @@ $('station').onsubmit=e=>{e.preventDefault();run(async()=>{
  }
  confirmedCall=stationCall;await refresh();message('Your station is saved and visible on the shared map.');
 })};
-$('remove').onclick=()=>run(async()=>{
- const stationCall=call();if(!stationCall)throw Error('Enter the callsign of the station to remove.');
- if(!confirm('Remove '+stationCall+' from the shared map?'))return;
- await api('delete',{callsign:stationCall,confirm_delete:true});confirmedCall='';if(pin){pin.remove();pin=null}await refresh();message('The station has been removed.');
-});
 $('fit').onclick=()=>{if(stations.length)map.fitBounds(L.latLngBounds(stations.map(s=>[s.lat,s.lng])),{padding:[35,35],maxZoom:12});else map.setView([32.6,-83.4],7)};
 refresh().then(()=>message('Enter your callsign to add your station.')).catch(e=>message(e.message));
 setInterval(()=>{if(!busy)refresh().catch(()=>{})},60000);
