@@ -33,7 +33,7 @@ $('lookup').onclick=()=>run(async()=>{
  else{if(pin){pin.remove();pin=null}message('Address loaded. Click the map to place your station.');}
 });
 $('address').addEventListener('input',()=>{if(pin){pin.remove();pin=null}message('Address changed. Click the map to confirm the new station location.')});
-$('callsign').addEventListener('input',()=>{showCallError(call()!=='');confirmedCall='';$('address').value='';if(pin){pin.remove();pin=null}});
+$('callsign').addEventListener('input',()=>{if(showCallError(call()!=='' )&&$('message').textContent===callsignError)message('Callsign format is valid. Look up QRZ or enter your station address.');confirmedCall='';$('address').value='';if(pin){pin.remove();pin=null}});
 $('station').onsubmit=e=>{e.preventDefault();run(async()=>{
  validateCall();
  if(!pin)throw Error('Click the map to confirm your station location.');
