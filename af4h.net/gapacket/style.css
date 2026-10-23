@@ -17,3 +17,5 @@
 .link-detail .test-badge{display:inline-block;font-size:10px;letter-spacing:.4px;text-transform:uppercase;border-radius:4px;background:#f5eddb;color:#72531c;padding:2px 6px;vertical-align:2px}
 .link-detail small{display:block;font-size:12px;line-height:1.5;margin-top:8px;color:#5b645f}
 @media(max-width:480px){.leaflet-tooltip.connectivity-tooltip{width:310px;padding:14px}.connectivity-popup .leaflet-popup-content{width:290px!important}.detail-row{grid-template-columns:80px minmax(0,1fr);column-gap:10px}}
+
+.leaflet-popup-pane,.leaflet-tooltip-pane{z-index:1000}
