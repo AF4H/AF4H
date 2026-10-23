@@ -1,0 +1,10 @@
+# Runtime data and credentials must stay outside public_html.
+config.php
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.db
+private/
+backups/
