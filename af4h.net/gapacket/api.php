@@ -31,7 +31,7 @@ function sendConfirmation($recipient,$subject,$body,$config){
   $command('EHLO af4h.net',[250]);
   if(!empty($config['smtp_username'])){$command('AUTH LOGIN',[334]);$command(base64_encode($config['smtp_username']),[334]);$command(base64_encode($config['smtp_password']??''),[235]);}
   $command('MAIL FROM:<af4h@af4h.net>',[250]);$command('RCPT TO:<'.$recipient.'>',[250,251]);$command('DATA',[354]);
-  $text="From: AF4H Packet Map <af4h@af4h.net>\r\nTo: ".$recipient."\r\nSubject: ".$subject."\r\nDate: ".date(DATE_RFC2822)."\r\nMessage-ID: <".bin2hex(random_bytes(16))."@af4h.net>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n".chunk_split(base64_encode($body),76,"\r\n");
+  $text="From: AF4H Packet Map <af4h@af4h.net>\r\nTo: ".$recipient."\r\nSubject: ".$subject."\r\nDate: ".date(DATE_RFC2822)."\r\nMessage-ID: <".bin2hex(random_bytes(16))."@af4h.net>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nAuto-Submitted: auto-generated\r\nX-Mailer: AF4H Station Map\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n".preg_replace('/^\\./m','..',quoted_printable_encode(str_replace("\n","\r\n",str_replace(["\r\n","\r"],"\n",$body))));
   if(fwrite($socket,$text."\r\n.\r\n")===false)throw new RuntimeException('SMTP write failed');$read([250]);fwrite($socket,"QUIT\r\n");fclose($socket);return true;
  }catch(Throwable $e){fclose($socket);error_log('GAPacket mail: '.$e->getMessage());return false;}
 }
