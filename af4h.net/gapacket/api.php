@@ -33,7 +33,7 @@ try{
  $window=$rate&&(int)$rate['window']>$now-600?(int)$rate['window']:$now;$n=$window===$now?1:(int)$rate['n']+1;
  $q=$db->prepare('INSERT OR REPLACE INTO limits VALUES (?,?,?)');$q->execute([$ip,$window,$n]);$db->exec('DELETE FROM limits WHERE window < '.($now-1200));$db->commit();if($n>40)fail('Too many requests. Please wait ten minutes.',429);
  $call=strtoupper(trim((string)($input['callsign']??'')));
- if(!preg_match('/^(?=.{3,15}$)(?=.*[A-Z])(?=.*[0-9])[A-Z0-9]+(?:\/[A-Z0-9]+)*$/D',$call))fail('Enter a valid callsign.');
+ if(!preg_match('~^(?:[KNW][0-9][A-Z]{1,3}|(?:A[A-L]|[KNW][A-Z])[0-9][A-Z]{1,3})(?:/[0-9]{1,2})?$~D',$call))fail('Enter a US callsign: K, N, W, or AA–AL prefix, one digit, and 1–3 suffix letters; optionally add /0 through /99. N0CALL is a placeholder only.');
  if($action==='lookup'){
   $config=is_file($private.'/config.php')?require $private.'/config.php':[];
   if(empty($config['qrz_username'])||empty($config['qrz_password']))fail('QRZ lookup is awaiting server configuration. You can enter your address and place a pin manually.',503);
