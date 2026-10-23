@@ -28,7 +28,7 @@ $('lookup').onclick=()=>run(async()=>{
  if(check.exists&&confirmedCall!==stationCall){if(!confirm(stationCall+': Callsign already registered. Update?')){message('Update canceled. Use a suffix such as '+stationCall.split('/')[0]+'/14 to add another station.');return;}confirmedCall=stationCall;}
  message('Looking up '+stationCall+' on QRZ…');
  const d=await api('lookup',{callsign:stationCall});$('address').value=d.address;
- if(check.station){point(check.station.lat,check.station.lng,true);document.querySelector('[name=status][value='+check.station.status+']').checked=true;message('Existing station loaded. QRZ filled the address; review it and save your changes.');}
+ if(check.station){point(check.station.lat,check.station.lng,true);document.querySelector('[name=status][value='+check.station.status+']').checked=true;updateRemovalMode();message('Existing station loaded. QRZ filled the address; review it and save your changes.');}
  else if(d.lat!==null&&d.lng!==null&&Number.isFinite(d.lat)&&Number.isFinite(d.lng)){point(d.lat,d.lng,true);message('QRZ address loaded. Review the address and pin before saving.');}
  else{if(pin){pin.remove();pin=null}message('Address loaded. Click the map to place your station.');}
 });
@@ -36,16 +36,20 @@ $('address').addEventListener('input',()=>{if(pin){pin.remove();pin=null}message
 $('callsign').addEventListener('input',()=>{if(showCallError(call()!=='' )&&$('message').textContent===callsignError)message('Callsign format is valid. Look up QRZ or enter your station address.');confirmedCall='';$('address').value='';if(pin){pin.remove();pin=null}});
 $('station').onsubmit=e=>{e.preventDefault();run(async()=>{
  validateCall();
- if(!pin)throw Error('Click the map to confirm your station location.');
- const stationCall=call(),p=pin.getLatLng(),payload={callsign:stationCall,address:$('address').value,status:document.querySelector('[name=status]:checked').value,lat:p.lat,lng:p.lng,confirm_update:confirmedCall===stationCall};
- try{await api('save',payload);}catch(e){
+ const removing=document.querySelector('[name=status]:checked').value==='remove';
+ if(!removing&&!pin)throw Error('Click the map to confirm your station location.');
+ const stationCall=call(),p=pin?pin.getLatLng():{lat:null,lng:null},payload={callsign:stationCall,address:$('address').value,status:document.querySelector('[name=status]:checked').value,lat:p.lat,lng:p.lng,confirm_update:confirmedCall===stationCall};
+ let result;try{result=await api('save',payload);}catch(e){
   if(e.code!=='already_registered')throw e;
   if(!confirm(stationCall+': Callsign already registered. Update?')){message('Update canceled. Your existing station was not changed.');return;}
-  confirmedCall=stationCall;await api('save',{...payload,confirm_update:true});
+  confirmedCall=stationCall;result=await api('save',{...payload,confirm_update:true});
  }
- confirmedCall=stationCall;await refresh();message('Your station is saved and visible on the shared map.');
+ confirmedCall='';await refresh();message(result.message);
 })};
 $('fit').onclick=()=>{if(stations.length)map.fitBounds(L.latLngBounds(stations.map(s=>[s.lat,s.lng])),{padding:[35,35],maxZoom:12});else map.setView([32.6,-83.4],7)};
 refresh().then(()=>message('Enter your callsign to add your station.')).catch(e=>message(e.message));
 setInterval(()=>{if(!busy)refresh().catch(()=>{})},60000);
 
+
+function updateRemovalMode(){const removing=document.querySelector('[name=status]:checked').value==='remove';$('address').required=!removing;$('address').disabled=removing;$('save').textContent=removing?'Email removal confirmation':'Email confirmation';}
+document.querySelectorAll('[name=status]').forEach(r=>r.addEventListener('change',updateRemovalMode));updateRemovalMode();
