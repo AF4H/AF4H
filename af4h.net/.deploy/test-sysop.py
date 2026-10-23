@@ -39,7 +39,7 @@ try:
  m=json.loads((private/'mail.json').read_text());assert m['recipient']=='owner@example.com';token=re.search('login=([a-f0-9]{64})',m['body']).group(1)
  assert admin('data')[0]==401 # Opening email is not authentication.
  assert admin('login_consume',{'token':token})[0]==200;assert admin('login_consume',{'token':token})[0]==403
- assert admin('data')[0]==200;assert admin('station_save',{'csrf':'bad'})[0]==403
+ assert admin('data')[0]==200;assert admin('audit')[1]['events'];assert admin('station_save',{'csrf':'bad'})[0]==403
  print('PASS passwordless sign-in: registry email, explicit consume, single use, authentication, CSRF')
  assert admin('sysop_remove',{'callsign':'AF4H'})[0]==400
  assert admin('sysop_save',{'callsign':'W1ABC','email':'other@example.com'})[0]==200
