@@ -24,13 +24,18 @@ const linkColors={online:'#269361',offline:'#4b5055',long_offline:'#b9bdc0'};
 const linkLabels={online:'Online',offline:'Offline',long_offline:'Long offline (>3 days)',disabled:'Disabled / hidden (>7 days or disabled)'};
 function linkWidth(bps){return 2+8*Math.max(0,Math.min(1,Math.log(Math.max(300,Number(bps)||300)/300)/Math.log(57600/300)));}
 function addText(parent,tag,text){const e=document.createElement(tag);e.textContent=text;parent.append(e);return e;}
+function detailRow(parent,label,value){const row=document.createElement('div');row.className='detail-row';addText(row,'span',label);addText(row,'span',value);parent.append(row);}
+function readableTime(value){return new Date(value).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}
 function linkDetails(link,stationId){
  const box=document.createElement('div');box.className='link-detail';
  const other=stationId?(link.a_node===stationId?link.z_node:link.a_node):link.a_node+' ↔ '+link.z_node;
- addText(box,'strong',other+(link.source==='test'?' · TEST LINK':''));
- addText(box,'div',(link.frequency_hz===null?'Frequency not supplied':(link.frequency_hz/1000000).toLocaleString(undefined,{maximumFractionDigits:6})+' MHz')+' · '+Number(link.capacity_bps).toLocaleString()+' bps');
- addText(box,'div',linkLabels[link.display_state]+' · reported '+link.status);
- addText(box,'div','Last seen: '+new Date(link.last_seen).toLocaleString());
+ addText(box,'strong',other);
+ if(link.source==='test')addText(box,'span','Test link').className='test-badge';
+ detailRow(box,'Frequency',link.frequency_hz===null?'Not supplied':(link.frequency_hz/1000000).toLocaleString(undefined,{maximumFractionDigits:6})+' MHz');
+ detailRow(box,'Capacity',Number(link.capacity_bps).toLocaleString()+' bps');
+ detailRow(box,'Link status',linkLabels[link.display_state]);
+ detailRow(box,'Reported',link.status);
+ detailRow(box,'Last seen',readableTime(link.last_seen));
  const ids=new Set(stations.map(s=>s.callsign));
  if(link.display_state==='disabled')addText(box,'small','Not plotted: link disabled or last seen over 7 days ago.');
  else if(!ids.has(link.a_node)||!ids.has(link.z_node))addText(box,'small','Not plotted: '+[link.a_node,link.z_node].filter(n=>!ids.has(n)).join(', ')+' is not a listed station.');
@@ -38,8 +43,8 @@ function linkDetails(link,stationId){
 }
 function stationDetails(s){
  const content=document.createElement('div');content.className='station-details';
- addText(content,'strong',s.callsign);addText(content,'div','Station: '+s.status);
- addText(content,'small','Updated '+new Date(s.updated).toLocaleString());
+ addText(content,'strong',s.callsign).className='station-title';detailRow(content,'Station',s.status);
+ detailRow(content,'Updated',readableTime(s.updated));
  const connected=links.filter(l=>l.a_node===s.callsign||l.z_node===s.callsign);
  addText(content,'h4',connected.length+' reported link'+(connected.length===1?'':'s'));
  if(!connected.length)addText(content,'div','No connectivity reports yet.');
@@ -51,12 +56,12 @@ function render(){
   const a=byId.get(l.a_node),z=byId.get(l.z_node);
   if(!a||!z||l.display_state==='disabled')return;
   const line=L.polyline([[a.lat,a.lng],[z.lat,z.lng]],{color:linkColors[l.display_state],weight:linkWidth(l.capacity_bps),opacity:l.display_state==='long_offline'?.7:.85,dashArray:l.display_state==='online'?null:'7 5'}).addTo(linkLayer);
-  line.bindTooltip(()=>linkDetails(l),{className:'connectivity-tooltip',sticky:true}).bindPopup(()=>linkDetails(l));plotted++;
+  line.bindTooltip(()=>linkDetails(l),{className:'connectivity-tooltip',sticky:true}).bindPopup(()=>linkDetails(l),{className:'connectivity-popup',minWidth:280,maxWidth:360});plotted++;
  });
  stations.forEach(s=>{
   L.circleMarker([s.lat,s.lng],{radius:8,color:'#fff',weight:2,fillColor:colors[s.status],fillOpacity:1}).addTo(layer)
    .bindTooltip(()=>stationDetails(s),{className:'connectivity-tooltip',direction:'auto',interactive:true})
-   .bindPopup(()=>stationDetails(s),{maxWidth:370});
+   .bindPopup(()=>stationDetails(s),{className:'connectivity-popup',minWidth:280,maxWidth:360});
  });
  $('count').textContent=stations.length+' stations · '+plotted+' plotted links · '+stations.filter(s=>s.status==='online').length+' online stations';
 }
