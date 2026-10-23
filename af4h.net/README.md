@@ -29,7 +29,11 @@ The API resolves this private directory relative to its deployment path. Preserv
 
 QRZ fills an editable address and coordinates when available. Changed addresses require the operator to place a pin manually; no address geocoding service is configured. Public station data includes callsign, coordinates, status, and update time. Street addresses and edit-key hashes are excluded from public responses.
 
-Additions need no edit key. Updating an existing station requires confirming the popup; anyone can confirm an update, and callsign ownership is self-reported. Additional IDs such as AF4H/14 are separate stations, with QRZ lookup using AF4H for a trailing numeric suffix. Stored street addresses are excluded from public responses, and lookup refills the address from QRZ. Deletion remains protected by the original edit key and is no longer offered in the interface. Existing database records are preserved. Email verification is a deferred idea and is not implemented.
+All additions, updates, and Remove requests are pending until approved by email. The recipient is resolved server-side from the base callsign's QRZ email; absent or invalid QRZ email falls back to af4h@af4h.net. QRZ failures stop the request instead of bypassing the lookup. Email addresses are not returned to the browser. Numeric station suffixes remain separate entries but use the base callsign for QRZ and approval email.
+
+Approval links expire after one hour and are single-use. GET only shows the proposed change; a CSRF-protected POST applies it. A changed station invalidates stale approvals, and approving a request invalidates other pending requests for that station. The old direct-delete endpoint is disabled. Remove applies only to the exact station ID after email approval. The legacy edit_hash column remains for database compatibility.
+
+SMTP uses the hosting server with STARTTLS and certificate verification. Host, port, optional authentication, and TLS peer name live only in the private config under smtp_host, smtp_port, smtp_username, smtp_password, and smtp_tls_name. No SMTP or QRZ credentials belong in this repository. A failed SMTP handoff leaves the map unchanged and removes the pending request. Pending requests are limited to three per station per hour, plus the shared IP rate limit. The private pending table stores recipients and proposed changes; protect and back up the database accordingly.
 
 The map uses Leaflet and OpenStreetMap tiles with attribution. Statuses are Online (green), Ready (blue), and Interested (amber).
 
