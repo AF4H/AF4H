@@ -36,3 +36,21 @@ qsl_ftp.sh '/full/path/to/card-folder'
 The helper publishes only combined JPEGs, uploads through a temporary filename, and records `ftp-sent.txt` after success. Remove that marker to republish an edited image. FTP failure does not prevent Frameo delivery. The gallery implementation is in [`af4h.net/qslcards`](../../af4h.net/qslcards); card images and credentials are runtime data, not repository content.
 
 For physical filing, use year, call sign, and QSO date; write the card ID on an archival sleeve. Back up the entire archive.
+
+## QRZ front-only preview
+
+FTP also publishes a front-only JPEG under `qslcards/fronts/`, with its own
+`ftp-front-sent.txt` success marker. Run `qsl_ftp.sh --all` to backfill existing
+cards. The image URL `https://af4h.net/qslcards/random-front.php` serves one
+random front per request. Link it to the full slideshow in a QRZ biography:
+
+```html
+<a href="https://af4h.net/qslcards/" target="_blank" rel="noopener">
+  <img src="https://af4h.net/qslcards/random-front.php"
+       alt="A random card from AF4H's QSL collection"
+       width="600" style="max-width:100%;height:auto;border:0;">
+</a>
+```
+
+This is a still image per page load, not a timed slideshow. The endpoint sends
+no-cache headers, but QRZ or an image proxy may cache its response.
