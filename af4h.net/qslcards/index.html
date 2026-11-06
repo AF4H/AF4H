@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AF4H · QSL collection</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0c131a;color:#edf1f5}*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:flex;flex-direction:column}header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #293541}h1{font-size:20px;margin:0;letter-spacing:.02em}h1 span{color:#d6b674}small{color:#a7b6c4}main{flex:1;display:grid;place-items:center;padding:12px;min-height:0}img{max-width:100%;height:calc(100dvh - 170px);object-fit:contain;display:block}footer{padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}button,select{font:inherit;background:#1c2a37;color:#edf1f5;border:1px solid #455564;border-radius:8px;padding:9px 14px;cursor:pointer}button:hover{background:#304456}button:focus-visible,select:focus-visible{outline:2px solid #d6b674;outline-offset:3px}#count{min-width:100px;text-align:center;color:#bbc7d2}#message{padding:30px;text-align:center} @media(max-width:600px){header{padding:12px 16px}h1{font-size:17px}header small{display:none}img{height:calc(100dvh - 210px)}footer{gap:7px;padding:8px}button,select{padding:8px 11px}}
+.embedded header{display:none}.embedded img{height:calc(100dvh - 125px)}.embedded footer{padding:8px;gap:6px}.embedded button,.embedded select{padding:6px 9px;font-size:12px}.embedded #full{display:none}[hidden]{display:none!important}</style>
+<header><h1><span>AF4H</span> / QSL collection</h1><small>Signals received. Connections remembered.</small></header>
+<main><img id="card" alt="" hidden><div id="message" role="status">Loading the collection…</div></main>
+<footer aria-label="Slideshow controls"><button id="prev" aria-label="Previous card">←</button><button id="play">Pause</button><button id="next" aria-label="Next card">→</button><span id="count" aria-live="polite"></span><label>Interval <select id="interval"><option value="5">5 sec</option><option value="10" selected>10 sec</option><option value="20">20 sec</option><option value="30">30 sec</option></select></label><button id="full">Full screen</button></footer>
+<script>
+let cards=[],position=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,timer;
+const card=document.querySelector('#card'),message=document.querySelector('#message'),play=document.querySelector('#play'),count=document.querySelector('#count');
+function schedule(){clearInterval(timer);play.textContent=playing?'Pause':'Play';if(playing&&cards.length>1)timer=setInterval(()=>show(position+1),Number(document.querySelector('#interval').value)*1000)}
+function shuffle(items){for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}return items}
+function show(n){if(!cards.length)return;if(n>=cards.length&&cards.length>1){const last=cards[position].url;shuffle(cards);if(cards[0].url===last)[cards[0],cards[1]]=[cards[1],cards[0]]}position=(n+cards.length)%cards.length;card.hidden=false;message.hidden=true;card.src=cards[position].url;card.alt=cards[position].name.replaceAll('_',' ');count.textContent=`${position+1} / ${cards.length}`;const preload=new Image();preload.src=cards[(position+1)%cards.length].url}
+async function refresh(){try{const response=await fetch('images.php',{cache:'no-store'});if(!response.ok)throw Error('Image list unavailable');const updated=await response.json();if(!Array.isArray(updated))throw Error('Invalid image list');const current=cards[position]?.url;const byUrl=new Map(updated.map(x=>[x.url,x]));const retained=cards.filter(x=>byUrl.has(x.url));const known=new Set(cards.map(x=>x.url));const added=shuffle(updated.filter(x=>!known.has(x.url)));cards=retained.length?[...retained,...added]:shuffle(updated);position=Math.max(0,cards.findIndex(x=>x.url===current));if(cards.length)show(position);else{card.hidden=true;message.hidden=false;message.textContent='The next QSL card is on its way. Check back soon.';count.textContent='0 cards'}schedule()}catch(error){if(!cards.length){message.hidden=false;message.textContent='Unable to load the collection. Please try again shortly.'}console.error(error)}}
+card.onerror=()=>{message.hidden=false;message.textContent='This image could not be loaded. Use Next to continue.'};
+document.querySelector('#prev').onclick=()=>{show(position-1);schedule()};document.querySelector('#next').onclick=()=>{show(position+1);schedule()};play.onclick=()=>{playing=!playing;schedule()};const interval=document.querySelector('#interval');
+const savedInterval=document.cookie.split('; ').find(x=>x.startsWith('qsl_interval='))?.split('=')[1];
+if(['5','10','20','30'].includes(savedInterval))interval.value=savedInterval;
+interval.onchange=()=>{document.cookie=`qsl_interval=${interval.value}; Max-Age=31536000; Path=/; SameSite=Lax; Secure`;schedule()};
+document.querySelector('#full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{message.hidden=false;message.textContent='Full screen is unavailable in this browser.'}};
+document.addEventListener('keydown',e=>{if(['SELECT','INPUT','BUTTON'].includes(e.target.tagName))return;if(e.key==='ArrowRight')document.querySelector('#next').click();if(e.key==='ArrowLeft')document.querySelector('#prev').click();if(e.code==='Space'){e.preventDefault();play.click()}});
+if(new URLSearchParams(location.search).has('embed'))document.body.classList.add('embedded');
+refresh();setInterval(refresh,60000);
+</script>
+</html>
